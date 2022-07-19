@@ -28,7 +28,6 @@ import { BusinessHourModule } from './business-hour/business-hour.module';
       entities: [join(__dirname, '**', '*.entity.{ts,js}')],
       synchronize: true,
     }),
-    /*
     UserModule,
     StoreModule,
     ReservationModule,
@@ -36,7 +35,6 @@ import { BusinessHourModule } from './business-hour/business-hour.module';
     StoreTableModule,
     BusinessOffModule,
     BusinessHourModule,
-    */
   ],
   controllers: [AppController],
   providers: [AppService],
