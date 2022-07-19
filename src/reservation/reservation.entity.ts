@@ -29,7 +29,7 @@ export class Reservation extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   public arrivalTime: Date;
 
-  @Column({ type: 'enum', enum: ReservationStatus, default: () => 'RESERVED' })
+  @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.RESERVED })
   public reservationStatus: ReservationStatus;
 
   @Column({ type: 'varchar', length: 50, nullable: false })
