@@ -4,6 +4,6 @@ import { StoreTableService } from './store-table.service';
 
 @Module({
   controllers: [StoreTableController],
-  providers: [StoreTableService]
+  providers: [StoreTableService],
 })
 export class StoreTableModule {}
