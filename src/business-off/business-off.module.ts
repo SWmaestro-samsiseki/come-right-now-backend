@@ -4,6 +4,6 @@ import { BusinessOffService } from './business-off.service';
 
 @Module({
   controllers: [BusinessOffController],
-  providers: [BusinessOffService]
+  providers: [BusinessOffService],
 })
 export class BusinessOffModule {}
