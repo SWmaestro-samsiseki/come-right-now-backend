@@ -1,6 +1,6 @@
 import { BusinessHour } from 'src/business-hour/business-hour.entity';
-import { BusinessOff } from 'src/business-off/business-off.entity';
 import { Category } from 'src/category/category.entity';
+import { DayOfWeek } from 'src/enum/days-of-week.enum';
 import { Reservation } from 'src/reservation/reservation.entity';
 import { StoreTable } from 'src/store-table/store-table.entity';
 import {
@@ -8,24 +8,21 @@ import {
   BaseEntity,
   Column,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
-  DeleteDateColumn,
   ManyToMany,
   JoinTable,
 } from 'typeorm';
 
 @Entity()
 export class Store extends BaseEntity {
-  @PrimaryGeneratedColumn(/*'increment'*/)
-  public storeId: number;
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
 
   @Column({ type: 'varchar', length: 30, nullable: false })
-  public storeEmail: string;
+  public email: string;
 
   @Column({ type: 'varchar', length: 200, nullable: false })
-  public storePassword: string;
+  public password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
   public masterName: string;
@@ -75,19 +72,19 @@ export class Store extends BaseEntity {
   @Column({ type: 'varchar', length: 250, nullable: true })
   public mainMenuImage: string;
 
+  @Column({ type: 'enum', enum: DayOfWeek, nullable: false })
+  public offDays: DayOfWeek[];
+
   @OneToMany(() => BusinessHour, (businessHour) => businessHour.store)
   public businessHours: BusinessHour[];
 
-  @OneToMany(() => BusinessOff, (businessOff) => businessOff.store)
-  public holidays: BusinessOff[];
-
-  @OneToMany((t) => StoreTable, (storeTable) => storeTable.store)
+  @OneToMany(() => StoreTable, (storeTable) => storeTable.store)
   public storeTables: StoreTable[];
 
   @OneToMany(() => Reservation, (reservation) => reservation.store)
   public reservations: Reservation[];
 
-  @ManyToMany(() => Category)
-  @JoinTable()
+  @ManyToMany(() => Category, { createForeignKeyConstraints: false })
+  @JoinTable({ name: 'store_category' })
   storeCategories: Category[];
 }

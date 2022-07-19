@@ -1,20 +1,10 @@
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Category extends BaseEntity {
   @PrimaryGeneratedColumn(/*'increment'*/)
-  public categoryId: number;
+  public id: number;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
-  public categoryName: string;
-
-  public deletedAt: Date;
+  public name: string;
 }

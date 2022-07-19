@@ -1,27 +1,15 @@
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { ReservationStatus } from '../enum/reservation-status.enum';
 
 @Entity()
 export class Reservation extends BaseEntity {
   @PrimaryGeneratedColumn(/*'increment'*/)
-  public reservationId: number;
+  public id: number;
 
   @Column({ type: 'int', nullable: false })
   public peopleNumber: number;
-
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  public userEmail: string;
 
   @Column({ type: 'timestamp', nullable: false })
   public estimatedTime: Date;
@@ -35,9 +23,13 @@ export class Reservation extends BaseEntity {
   @Column({ type: 'varchar', length: 50, nullable: false })
   public reservedTable: string;
 
-  @ManyToOne(() => User, (user) => user.reservations)
+  @ManyToOne(() => User, (user) => user.reservations, {
+    createForeignKeyConstraints: false,
+  })
   user: User;
 
-  @ManyToOne(() => Store, (store) => store.reservations)
+  @ManyToOne(() => Store, (store) => store.reservations, {
+    createForeignKeyConstraints: false,
+  })
   store: Store;
 }

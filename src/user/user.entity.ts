@@ -1,34 +1,25 @@
 import { Reservation } from 'src/reservation/reservation.entity';
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn(/*'increment'*/)
-  public userId: number;
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
 
   @Column({ type: 'varchar', length: 30, nullable: false })
-  public userEmail: string;
+  public email: string;
 
   @Column({ type: 'varchar', length: 200, nullable: false })
-  public userPassword: string;
+  public password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
-  public userName: string;
+  public name: string;
 
   @Column({ type: 'varchar', length: 15, nullable: false })
-  public userPhone: string;
+  public phone: string;
 
   @Column({ type: 'varchar', length: 6, nullable: false })
-  public userBirthDate: string;
+  public birthDate: string;
 
   @Column({ type: 'int', nullable: false })
   public creditRate: number;
