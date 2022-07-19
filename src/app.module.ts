@@ -9,7 +9,6 @@ import { StoreModule } from './store/store.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { CategoryModule } from './category/category.module';
 import { StoreTableModule } from './store-table/store-table.module';
-import { BusinessOffModule } from './business-off/business-off.module';
 import { BusinessHourModule } from './business-hour/business-hour.module';
 
 @Module({
@@ -33,7 +32,6 @@ import { BusinessHourModule } from './business-hour/business-hour.module';
     ReservationModule,
     CategoryModule,
     StoreTableModule,
-    BusinessOffModule,
     BusinessHourModule,
   ],
   controllers: [AppController],
