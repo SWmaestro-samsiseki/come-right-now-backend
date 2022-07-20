@@ -39,11 +39,11 @@ export class Store extends BaseEntity {
   @Column({ type: 'varchar', length: 120, nullable: false })
   public address: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
-  public latitude: string;
+  @Column({ type: 'decimal', precision: 18, scale: 10 })
+  public latitude: number;
 
-  @Column({ type: 'varchar', length: 20, nullable: false })
-  public longitude: string;
+  @Column({ type: 'decimal', precision: 18, scale: 10 })
+  public longitude: number;
 
   @Column({ type: 'varchar', length: 15, nullable: true })
   public storePhone: string;
@@ -72,7 +72,7 @@ export class Store extends BaseEntity {
   @Column({ type: 'varchar', length: 250, nullable: true })
   public mainMenuImage: string;
 
-  @Column({ type: 'enum', enum: DayOfWeek, nullable: false })
+  @Column({ type: 'enum', enum: DayOfWeek, nullable: true })
   public offDays: DayOfWeek[];
 
   @OneToMany(() => BusinessHour, (businessHour) => businessHour.store)
@@ -86,5 +86,5 @@ export class Store extends BaseEntity {
 
   @ManyToMany(() => Category, { createForeignKeyConstraints: false })
   @JoinTable({ name: 'store_category' })
-  storeCategories: Category[];
+  categories: Category[];
 }
