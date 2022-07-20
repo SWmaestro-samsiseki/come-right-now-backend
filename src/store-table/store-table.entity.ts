@@ -1,26 +1,19 @@
 import { Store } from 'src/store/store.entity';
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class StoreTable extends BaseEntity {
   @PrimaryGeneratedColumn(/*'increment'*/)
-  public storeTableId: number;
+  public id: number;
 
   @Column({ type: 'int', nullable: false })
   public tableNumber: number;
 
-  @Column({ type: 'tinyint', nullable: false })
+  @Column({ type: 'tinyint', nullable: false, default: 0 })
   public isReserved: number;
 
-  @ManyToOne(() => Store, (store) => store.storeTables)
+  @ManyToOne(() => Store, (store) => store.storeTables, {
+    createForeignKeyConstraints: false,
+  })
   store: Store;
 }

@@ -1,11 +1,11 @@
-import { DayOfWeek } from '../enum/days-of-week.enum';
-import { Store } from '../store/store.entity';
+import { DayOfWeek } from 'src/enum/days-of-week.enum';
+import { Store } from 'src/store/store.entity';
 import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class BusinessHour extends BaseEntity {
-  @PrimaryGeneratedColumn(/*'increment'*/)
-  public businessHourId: number;
+  @PrimaryGeneratedColumn('uuid')
+  public id: number;
 
   @Column({ type: 'enum', enum: DayOfWeek, nullable: false })
   public businessDay: DayOfWeek;
@@ -16,8 +16,8 @@ export class BusinessHour extends BaseEntity {
   @Column({ type: 'time', nullable: false })
   public CloseAt: DayOfWeek;
 
-  @ManyToOne(() => Store, (store) => store.businessHours)
+  @ManyToOne(() => Store, (store) => store.businessHours, {
+    createForeignKeyConstraints: false,
+  })
   store: Store;
-
-  public deletedAt: Date;
 }
