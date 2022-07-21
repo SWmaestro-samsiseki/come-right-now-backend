@@ -8,25 +8,30 @@ export class StoreService {
   constructor(@InjectRepository(Store) private storeRepository: Repository<Store>) {}
 
   // 각도를 라디안으로 변환
-  deg2rad(deg: number): number {
-    return deg * (Math.PI / 180);
+  degreeToRadian(degree: number): number {
+    return degree * (Math.PI / 180);
   }
 
   //두 지점 사이의 거리 계산 (직선거리)
   //meter 단위로 반환
-  getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  getDistance(
+    latitude1: number,
+    longitude1: number,
+    latitude2: number,
+    longitude2: number,
+  ): number {
     const R = 6371; // Radius of the earth in km
-    const dLat = this.deg2rad(lat2 - lat1);
-    const dLon = this.deg2rad(lng2 - lng1);
+    const dLat = this.degreeToRadian(latitude2 - latitude1);
+    const dLon = this.degreeToRadian(longitude2 - longitude1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(lat1)) *
-        Math.cos(this.deg2rad(lat2)) *
+      Math.cos(this.degreeToRadian(latitude1)) *
+        Math.cos(this.degreeToRadian(latitude2)) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
-    return d * 1000;
+    const tmp = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const kmDistance = R * tmp;
+    return kmDistance * 1000;
   }
 
   //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
