@@ -5,7 +5,7 @@ export class findStoreDTO {
 
   arrivedAt: Date;
 
-  userId: number;
+  userId: string;
 
   longitude: number;
 
