@@ -22,18 +22,21 @@ export class UserGateway {
     private readonly userService: UserService,
   ) {}
 
+  //#WTD-160
   @SubscribeMessage('findStore')
   async findStore(@ConnectedSocket() socket: Socket, @MessageBody() data: findStoreDTO) {
     const candidateStores = await this.storeService.findCandidateStores(
       data.longitude,
       data.latitude,
       data.categories,
-      500, // test 500meter
+      500, // 500meter 이내 stores 테스트
     );
+
     const user = await this.userService.findUser(data.userId);
     const { numberOfPeople, arrivedAt } = data;
 
     for (let i = 0; i < candidateStores.length; i++) {
+      // 찾은 stores에 대하여 자리 요청 이벤트 전송
       const storeId = candidateStores[i].id;
       const storeIdData: storeIdDTO = {
         numberOfPeople,

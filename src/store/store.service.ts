@@ -7,10 +7,13 @@ import { Store } from './store.entity';
 export class StoreService {
   constructor(@InjectRepository(Store) private storeRepository: Repository<Store>) {}
 
+  // 각도를 라디안으로 변환
   deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
 
+  //두 지점 사이의 거리 계산 (직선거리)
+  //meter 단위로 반환
   getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371; // Radius of the earth in km
     const dLat = this.deg2rad(lat2 - lat1);
@@ -22,10 +25,11 @@ export class StoreService {
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
-    return d;
+    const d = R * c;
+    return d * 1000;
   }
 
+  //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
   async findCandidateStores(
     longitude: number,
     latitude: number,
@@ -43,15 +47,15 @@ export class StoreService {
         },
       });
       totalStores.push(...stores);
-    }
+    } //원하는 카테고리를 가진 stores
 
     const filteredStores = totalStores.filter((store) => {
-      const d = this.getDistance(latitude, longitude, store.latitude, store.longitude) * 1000; // meter
+      const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
       if (d <= distance) {
         return true;
       }
       return false;
-    });
+    }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
     return filteredStores;
   }
 }
