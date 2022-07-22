@@ -1,16 +1,21 @@
+import { Account } from 'src/account/account.entity';
 import { Reservation } from 'src/reservation/reservation.entity';
-import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  BaseEntity,
+  Column,
+  OneToMany,
+  PrimaryColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
+  @OneToOne(() => Account, (account) => account.id, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'id' })
   public id: string;
-
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  public email: string;
-
-  @Column({ type: 'varchar', length: 200, nullable: false })
-  public password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
   public name: string;

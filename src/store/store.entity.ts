@@ -1,3 +1,4 @@
+import { Account } from 'src/account/account.entity';
 import { BusinessHour } from 'src/business-hour/business-hour.entity';
 import { Category } from 'src/category/category.entity';
 import { DayOfWeek } from 'src/enum/days-of-week.enum';
@@ -7,22 +8,20 @@ import {
   Entity,
   BaseEntity,
   Column,
-  PrimaryGeneratedColumn,
   OneToMany,
   ManyToMany,
   JoinTable,
+  PrimaryColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
 export class Store extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
+  @OneToOne(() => Account, (account) => account.id, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'id' })
   public id: string;
-
-  @Column({ type: 'varchar', length: 30, nullable: false })
-  public email: string;
-
-  @Column({ type: 'varchar', length: 200, nullable: false })
-  public password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
   public masterName: string;

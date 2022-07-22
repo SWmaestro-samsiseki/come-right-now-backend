@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Account } from 'src/account/account.entity';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
 import { Store } from './store.entity';
@@ -9,6 +10,7 @@ export class StoreController {
   constructor(
     @InjectRepository(Store) private storeRepository: Repository<Store>,
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
+    @InjectRepository(Account) private acountRepository: Repository<Account>,
   ) {}
 
   // 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
@@ -21,6 +23,7 @@ export class StoreController {
     c2.name = 'test2';
     await this.categoryRepository.save(c2);
     for (let i = 1; i < 101; i++) {
+      const dummyAccount = this.acountRepository.create();
       const dummy = this.storeRepository.create();
       let lat = 0;
       let lng = 0;
@@ -33,8 +36,11 @@ export class StoreController {
         lng = 126.976433 - Math.random() / 100;
         dummy.categories = [c2];
       }
-      dummy.email = 'test';
-      dummy.password = 'test';
+      dummyAccount.email = 'test';
+      dummyAccount.password = 'test';
+      const account = await this.acountRepository.save(dummyAccount);
+
+      dummy.id = account.id;
       dummy.masterName = 'test';
       dummy.storeName = 'test';
       dummy.businessName = 'test';
