@@ -10,6 +10,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { CategoryModule } from './category/category.module';
 import { StoreTableModule } from './store-table/store-table.module';
 import { BusinessHourModule } from './business-hour/business-hour.module';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BusinessHourModule } from './business-hour/business-hour.module';
     CategoryModule,
     StoreTableModule,
     BusinessHourModule,
+    AccountModule,
   ],
   controllers: [AppController],
   providers: [AppService],
