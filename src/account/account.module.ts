@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountController } from './account.controller';
 import { Account } from './account.entity';
 import { AccountService } from './account.service';
+import { JwtStrategy } from './account.strategy';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AccountService } from './account.service';
     JwtModule.register({ secret: 'Soma123', signOptions: { expiresIn: '1y' } }),
   ],
   controllers: [AccountController],
-  providers: [AccountService],
+  providers: [AccountService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AccountModule {}
