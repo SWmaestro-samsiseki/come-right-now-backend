@@ -17,7 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload) {
     const { uuid } = payload;
     const account: Account = await this.accountRepository.findOne({ where: { id: uuid } });
-    console.log(account);
     if (!account) {
       throw new UnauthorizedException('로그인 정보가 존재하지 않습니다.');
     }
