@@ -3,14 +3,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 
-type findOneOption = {
-  where: {
-    id: string;
-  };
-};
-
 class MockRepository {
-  async findOne(option: findOneOption) {
+  async findOne(option) {
     const {
       where: { id },
     } = option;
