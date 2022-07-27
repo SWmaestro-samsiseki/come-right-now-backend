@@ -8,13 +8,13 @@ export class StoreService {
   constructor(@InjectRepository(Store) private storeRepository: Repository<Store>) {}
 
   // 각도를 라디안으로 변환
-  degreeToRadian(degree: number): number {
+  private degreeToRadian(degree: number): number {
     return degree * (Math.PI / 180);
   }
 
   //두 지점 사이의 거리 계산 (직선거리)
   //meter 단위로 반환
-  getDistance(
+  private getDistance(
     latitude1: number,
     longitude1: number,
     latitude2: number,

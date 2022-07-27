@@ -1,18 +1,45 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './user.entity';
 import { UserService } from './user.service';
 
+class MockRepository {
+  async findOne(option) {
+    const {
+      where: { id },
+    } = option;
+
+    const user = new User();
+    user.id = id;
+
+    return user;
+  }
+}
+
 describe('UserService', () => {
-  let service: UserService;
+  let userService: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        {
+          provide: getRepositoryToken(User),
+          useClass: MockRepository,
+        },
+      ],
     }).compile();
 
-    service = module.get<UserService>(UserService);
+    userService = module.get<UserService>(UserService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('findUser', () => {
+    it('return user when there is user with the id', async () => {
+      const userId = 'testId';
+
+      const user = await userService.findUser(userId);
+
+      expect(user.id).toBe(userId);
+    });
   });
 });
