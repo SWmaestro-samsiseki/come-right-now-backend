@@ -11,6 +11,7 @@ import { CategoryModule } from './category/category.module';
 import { StoreTableModule } from './store-table/store-table.module';
 import { BusinessHourModule } from './business-hour/business-hour.module';
 import { AccountModule } from './account/account.module';
+import { ReservationEventsModule } from './reservation-events/reservation-events.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AccountModule } from './account/account.module';
     StoreTableModule,
     BusinessHourModule,
     AccountModule,
+    ReservationEventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
