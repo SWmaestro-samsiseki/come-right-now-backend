@@ -7,7 +7,6 @@ import {
 import { Socket } from 'socket.io';
 import { findStoreDTO } from 'src/reservation-events/eventDTO/findStore.dto';
 import { storeIdDTO } from 'src/reservation-events/eventDTO/storeId.dto';
-import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
@@ -30,7 +29,12 @@ export class ReservationEventsGateway {
     const distance = 500;
     // #1. 주점 검색
     const { longitude, latitude, categories } = data;
-    const stores = await this.searchNearStore(longitude, latitude, categories, distance);
+    const stores = await this.storeService.findCandidateStores(
+      longitude,
+      latitude,
+      categories,
+      distance,
+    );
 
     // #2. 주점으로 이벤트 전송
     const { numberOfPeople, arrivedAt, userId } = data;
@@ -38,25 +42,6 @@ export class ReservationEventsGateway {
     for (const store of stores) {
       this.sendToStore(socket, store.id, numberOfPeople, arrivedAt, user);
     }
-  }
-
-  /*
-  사용자 위치 기반 distance 내 선호 카테고리가 겹치는 주점 검색
-   */
-  async searchNearStore(
-    longitude: number,
-    latitude: number,
-    categories: string[],
-    distance: number,
-  ): Promise<Store[]> {
-    const candidateStores = await this.storeService.findCandidateStores(
-      longitude,
-      latitude,
-      categories,
-      distance,
-    );
-
-    return candidateStores;
   }
 
   /*
