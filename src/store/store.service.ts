@@ -38,7 +38,7 @@ export class StoreService {
   async findCandidateStores(
     longitude: number,
     latitude: number,
-    categories: string[],
+    categories: number[],
     distance: number,
   ): Promise<Store[]> {
     const totalStores = [];
@@ -47,7 +47,7 @@ export class StoreService {
         relations: ['categories'],
         where: {
           categories: {
-            name: categories[i],
+            id: categories[i],
           },
         },
       });

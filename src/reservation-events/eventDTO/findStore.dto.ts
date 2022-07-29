@@ -1,5 +1,5 @@
 export class findStoreDTO {
-  categories: string[];
+  categories: number[];
 
   numberOfPeople: number;
 
