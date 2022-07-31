@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Req, UseGuards, ValidationPipe } from '@ne
 import { AuthGuard } from '@nestjs/passport';
 import { LoginInputDto, LoginOutputDTO } from './account.dto';
 import { AccountService } from './account.service';
+import { getAccount } from './get-account.decorator';
 
 @Controller('account')
 export class AccountController {
@@ -14,7 +15,7 @@ export class AccountController {
 
   @Get('/validation')
   @UseGuards(AuthGuard())
-  checkValidation(@Req() request) {
-    return { statusCode: 200, userType: request.user.userType };
+  checkValidation(@getAccount() account) {
+    return { statusCode: 200, userType: account.userType };
   }
 }
