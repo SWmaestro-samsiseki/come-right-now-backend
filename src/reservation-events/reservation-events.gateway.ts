@@ -29,15 +29,13 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly accountService: AccountService,
   ) {}
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    const token = socket.data.token;
-    console.log(token);
-    const payload = this.accountService.getPayload(token);
-    const id = payload.uuid;
-    if (payload.userType === 'USER') {
+    const id = socket.data.uuid;
+    const userType = socket.data.userType;
+    if (userType === 'USER') {
       if (id in userOnlineMap) {
         delete userOnlineMap[id];
       }
-    } else if (payload.userType === 'STORE') {
+    } else if (userType === 'STORE') {
       if (id in storeOnlineMap) {
         delete storeOnlineMap[id];
       }
@@ -50,16 +48,13 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     const payload = this.accountService.getPayload(token);
     const id = payload.uuid;
     if (payload.userType === 'USER') {
-      if (!(id in userOnlineMap)) {
-        userOnlineMap[id] = socket.id;
-      }
+      userOnlineMap[id] = socket.id;
     } else if (payload.userType === 'STORE') {
-      if (!(id in storeOnlineMap)) {
-        storeOnlineMap[id] = socket.id;
-      }
+      storeOnlineMap[id] = socket.id;
     }
 
-    socket.data.token = token;
+    socket.data.uuid = id;
+    socket.data.userType = payload.userType;
     console.log('***connected***');
     console.log(userOnlineMap);
   }
