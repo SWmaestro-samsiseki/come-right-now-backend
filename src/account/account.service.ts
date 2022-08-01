@@ -5,6 +5,7 @@ import { LoginInputDto, LoginOutputDTO } from './account.dto';
 import { Account } from './account.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './account.constants';
 
 @Injectable()
 export class AccountService {
@@ -20,7 +21,7 @@ export class AccountService {
     //if (account && (await bcrypt.compare(password, account.password))) {
     if (account && password === account.password) {
       const payload = { uuid: account.id, email, userType: account.userType };
-      const accessToken = await this.jwtService.sign(payload);
+      const accessToken = this.jwtService.sign(payload);
       return {
         isSuccess: true,
         message: '로그인에 성공했습니다.',
@@ -35,5 +36,13 @@ export class AccountService {
         userType: '',
       };
     }
+  }
+
+  getPayload(token: string) {
+    const decoded = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET_KEY,
+    });
+
+    return decoded;
   }
 }

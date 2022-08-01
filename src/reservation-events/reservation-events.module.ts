@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { StoreModule } from 'src/store/store.module';
-import { UserModule } from 'src/user/user.module';
+import { AccountModule } from 'src/account/account.module';
 import { ReservationEventsGateway } from './reservation-events.gateway';
 
 @Module({
-  imports: [StoreModule, UserModule],
+  imports: [AccountModule],
   providers: [ReservationEventsGateway],
+  exports: [ReservationEventsGateway],
 })
 export class ReservationEventsModule {}
