@@ -3,6 +3,8 @@ import {
   WebSocketGateway,
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { findStoreDTO } from 'src/reservation-events/eventDTO/findStore.dto';
@@ -10,6 +12,9 @@ import { storeIdDTO } from 'src/reservation-events/eventDTO/storeId.dto';
 import { User } from 'src/user/user.entity';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
+import { AccountService } from 'src/account/account.service';
+import { userOnlineMap } from './onlineMaps/user.onlineMap';
+import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 
 @WebSocketGateway({
   cors: {
@@ -17,11 +22,47 @@ import { UserService } from 'src/user/user.service';
     credentials: true,
   },
 })
-export class ReservationEventsGateway {
+export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly storeService: StoreService,
     private readonly userService: UserService,
+    private readonly accountService: AccountService,
   ) {}
+  handleDisconnect(@ConnectedSocket() socket: Socket) {
+    const token = socket.data.token;
+    console.log(token);
+    const payload = this.accountService.getPayload(token);
+    const id = payload.uuid;
+    if (payload.userType === 'USER') {
+      if (id in userOnlineMap) {
+        delete userOnlineMap[id];
+      }
+    } else if (payload.userType === 'STORE') {
+      if (id in storeOnlineMap) {
+        delete storeOnlineMap[id];
+      }
+    }
+    console.log('***disconnected***');
+    console.log(userOnlineMap);
+  }
+  handleConnection(@ConnectedSocket() socket: Socket) {
+    const token = socket.handshake.headers.auth as string;
+    const payload = this.accountService.getPayload(token);
+    const id = payload.uuid;
+    if (payload.userType === 'USER') {
+      if (!(id in userOnlineMap)) {
+        userOnlineMap[id] = socket.id;
+      }
+    } else if (payload.userType === 'STORE') {
+      if (!(id in storeOnlineMap)) {
+        storeOnlineMap[id] = socket.id;
+      }
+    }
+
+    socket.data.token = token;
+    console.log('***connected***');
+    console.log(userOnlineMap);
+  }
 
   //#WTD-160
   @SubscribeMessage('findStore')
