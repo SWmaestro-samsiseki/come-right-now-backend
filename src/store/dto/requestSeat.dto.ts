@@ -1,9 +1,9 @@
-export class storeIdDTO {
+export class requestSeatDTO {
   numberOfPeople: number;
 
   arrivedAt: Date;
 
-  userSocketId: string;
+  userId: string;
 
   username: string;
 
