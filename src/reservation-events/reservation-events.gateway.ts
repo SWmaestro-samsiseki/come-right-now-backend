@@ -31,8 +31,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         delete storeOnlineMap[id];
       }
     }
+    //TODO: 로그로 전환
     console.log('***disconnected***');
+    console.log('<User Online>');
     console.log(userOnlineMap);
+    console.log('Store Online>');
+    console.log(storeOnlineMap);
   }
   handleConnection(@ConnectedSocket() socket: Socket) {
     const token = socket.handshake.headers.auth as string;
@@ -46,7 +50,11 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
 
     socket.data.uuid = id;
     socket.data.userType = payload.userType;
+    //TODO: 로그로 전환
     console.log('***connected***');
+    console.log('<User Online>');
     console.log(userOnlineMap);
+    console.log('Store Online>');
+    console.log(storeOnlineMap);
   }
 }
