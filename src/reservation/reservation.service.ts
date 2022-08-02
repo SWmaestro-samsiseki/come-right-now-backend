@@ -10,7 +10,7 @@ export class ReservationService {
     @InjectRepository(Reservation) private readonly reservationRepository: Repository<Reservation>,
   ) {}
 
-  async findReservationByUserId(userId: string) {
+  async getReservationByUserId(userId: string) {
     const reservation = await this.reservationRepository.findOne({
       relations: ['user', 'store'],
       where: {
@@ -22,5 +22,27 @@ export class ReservationService {
     });
 
     return reservation;
+  }
+
+  async getStoreReservationByStatus(type: string, storeId: string) {
+    let reservedStatus: ReservationStatus;
+
+    if (type === 'pending') {
+      reservedStatus = ReservationStatus.PENDING;
+    } else if (type === 'reserved') {
+      reservedStatus = ReservationStatus.RESERVED;
+    }
+
+    const reservations = await this.reservationRepository.find({
+      relations: ['user', 'store'],
+      where: {
+        store: {
+          id: storeId,
+        },
+        reservationStatus: reservedStatus,
+      },
+    });
+
+    return reservations;
   }
 }
