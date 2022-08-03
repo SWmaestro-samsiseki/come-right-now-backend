@@ -122,15 +122,13 @@ export class StoreController {
   }
 
   @Post('test/seat-request')
-  async testFindStore(@Body() findStoreDTO: findStoreDTO) {
-    const { numberOfPeople, arrivedAt, userId } = findStoreDTO;
+  async testFindStore() {
     const socketServer = this.reservationEventsGateway.server;
-
-    const user = await this.userService.findUser(userId);
+    const user = await this.userService.findUser('u1');
     const storeSocketId = storeOnlineMap['u2'];
     const requestSeatDTO: requestSeatDTO = {
-      numberOfPeople,
-      arrivedAt,
+      numberOfPeople: 10,
+      arrivedAt: new Date(),
       userId: user.id,
       username: user.name,
       userPhone: user.phone,
