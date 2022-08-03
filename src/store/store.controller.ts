@@ -120,4 +120,24 @@ export class StoreController {
       mainMenu3,
     };
   }
+
+  @Post('test/seat-request')
+  async testFindStore() {
+    const socketServer = this.reservationEventsGateway.server;
+    const user = await this.userService.findUser('u1');
+    const storeSocketId = storeOnlineMap['u2'];
+    const requestSeatDTO: requestSeatDTO = {
+      numberOfPeople: 10,
+      arrivedAt: new Date(),
+      userId: user.id,
+      username: user.name,
+      userPhone: user.phone,
+      creditRate: user.creditRate,
+    };
+    socketServer.to(storeSocketId).emit('requestSeat', requestSeatDTO);
+
+    return {
+      isSuccess: true,
+    };
+  }
 }
