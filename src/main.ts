@@ -2,6 +2,8 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+import * as morgan from 'morgan';
+
 async function bootstrap() {
   // #1. 서버 환경 설정
   const port = process.env.SERVER_PORT || 80;
@@ -16,6 +18,7 @@ async function bootstrap() {
 async function initServer(port) {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+  app.use(morgan('tiny'));
 
   // #3. 바인딩
   await app.listen(port, () => Logger.log(`Server started on port ${process.env.SERVER_PORT}`));

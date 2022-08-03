@@ -71,6 +71,9 @@ export class Store extends BaseEntity {
   @Column({ type: 'varchar', length: 250, nullable: true })
   public mainMenuImage: string;
 
+  @Column({ type: 'decimal', precision: 1, scale: 1, nullable: false })
+  public starRate: number;
+
   @Column({ type: 'enum', enum: DayOfWeek, nullable: true })
   public offDays: DayOfWeek[];
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from 'src/account/account.entity';
 import { Category } from 'src/category/category.entity';
@@ -94,6 +94,30 @@ export class StoreController {
 
     return {
       isSuccess: true,
+    };
+  }
+
+  @Get(':id')
+  async getStoreById(@Param('id') id: string) {
+    const store = await this.storeService.getStoreById(id);
+
+    if (!store) {
+      throw new NotFoundException();
+    }
+
+    const { storeName, storeType, starRate, address, storePhone, mainMenu1, mainMenu2, mainMenu3 } =
+      store;
+
+    //TODO: openAt, closeAt 추가
+    return {
+      storeName,
+      storeType,
+      starRate,
+      address,
+      storePhone,
+      mainMenu1,
+      mainMenu2,
+      mainMenu3,
     };
   }
 }

@@ -63,4 +63,13 @@ export class StoreService {
     }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
     return filteredStores;
   }
+
+  async getStoreById(storeId: string) {
+    const store = await this.storeRepository.findOne({
+      where: {
+        id: storeId,
+      },
+    });
+    return store;
+  }
 }
