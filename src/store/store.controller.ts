@@ -120,4 +120,26 @@ export class StoreController {
       mainMenu3,
     };
   }
+
+  @Post('test/seat-request')
+  async testFindStore(@Body() findStoreDTO: findStoreDTO) {
+    const { numberOfPeople, arrivedAt, userId } = findStoreDTO;
+    const socketServer = this.reservationEventsGateway.server;
+
+    const user = await this.userService.findUser(userId);
+    const storeSocketId = storeOnlineMap['u2'];
+    const requestSeatDTO: requestSeatDTO = {
+      numberOfPeople,
+      arrivedAt,
+      userId: user.id,
+      username: user.name,
+      userPhone: user.phone,
+      creditRate: user.creditRate,
+    };
+    socketServer.to(storeSocketId).emit('requestSeat', requestSeatDTO);
+
+    return {
+      isSuccess: true,
+    };
+  }
 }
