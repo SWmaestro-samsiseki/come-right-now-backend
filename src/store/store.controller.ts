@@ -77,6 +77,8 @@ export class StoreController {
       mainMenu1,
       mainMenu2,
       mainMenu3,
+      openAt: store.businessHours[0].openAt,
+      closeAt: store.businessHours[0].closeAt,
     };
   }
 }
