@@ -3,7 +3,7 @@ export class findStoreDTO {
 
   numberOfPeople: number;
 
-  arrivedAt: Date;
+  willArrivedAt: Date;
 
   userId: string;
 

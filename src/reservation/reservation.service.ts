@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
+import { Store } from 'src/store/store.entity';
+import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Reservation } from './reservation.entity';
 
@@ -8,6 +10,8 @@ import { Reservation } from './reservation.entity';
 export class ReservationService {
   constructor(
     @InjectRepository(Reservation) private readonly reservationRepository: Repository<Reservation>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
   ) {}
 
   async getReservationByUserId(userId: string) {
@@ -51,5 +55,26 @@ export class ReservationService {
     willArrivedAt: Date,
     userId: string,
     storeId: string,
-  ): Promise<Reservation> {}
+  ): Promise<Reservation> {
+    const reservation = this.reservationRepository.create();
+    reservation.peopleNumber = numberOfPeople;
+    reservation.estimatedTime = willArrivedAt;
+    reservation.reservationStatus = ReservationStatus.REQUESTED;
+    reservation.reservedTable = '1,2';
+    const store = await this.storeRepository.findOne({
+      where: {
+        id: storeId,
+      },
+    });
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    reservation.store = store;
+    reservation.user = user;
+    const result = await this.reservationRepository.save(reservation);
+
+    return result;
+  }
 }
