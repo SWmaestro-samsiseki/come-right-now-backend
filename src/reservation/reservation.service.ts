@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
@@ -14,7 +14,10 @@ export class ReservationService {
     @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
   ) {}
 
-  async getReservationByUserId(userId: string) {
+  async getReservationByUserId(status: string, userId: string) {
+    if (status !== 'reserved') {
+      throw new BadRequestException();
+    }
     const reservation = await this.reservationRepository.findOne({
       relations: ['user', 'store'],
       where: {
@@ -28,12 +31,12 @@ export class ReservationService {
     return reservation;
   }
 
-  async getStoreReservationByStatus(type: string, storeId: string) {
+  async getStoreReservationByStatus(status: string, storeId: string) {
     let reservedStatus: ReservationStatus;
 
-    if (type === 'pending') {
-      reservedStatus = ReservationStatus.PENDING;
-    } else if (type === 'reserved') {
+    if (status === 'requested') {
+      reservedStatus = ReservationStatus.REQUESTED;
+    } else if (status === 'reserved') {
       reservedStatus = ReservationStatus.RESERVED;
     }
 

@@ -8,8 +8,8 @@ export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Get('user/:id')
-  async getUserReserved(@Param('id') userId: string) {
-    const reservation = await this.reservationService.getReservationByUserId(userId);
+  async getUserReserved(@Query('status') status: string, @Param('id') userId: string) {
+    const reservation = await this.reservationService.getReservationByUserId(status, userId);
     const getUserReservedDTO: getUserReservedDTO = {
       reservationId: reservation.id,
       arrivalTime: reservation.arrivalTime,
@@ -21,8 +21,8 @@ export class ReservationController {
   }
 
   @Get('store/:id')
-  async getStoreReservedAndPending(@Query('type') type: string, @Param('id') storeId: string) {
-    const reservations = await this.reservationService.getStoreReservationByStatus(type, storeId);
+  async getStoreReservedAndPending(@Query('status') status: string, @Param('id') storeId: string) {
+    const reservations = await this.reservationService.getStoreReservationByStatus(status, storeId);
     const results: getStoreReservationDTO[] = [];
     for (const reservation of reservations) {
       const { estimatedTime } = reservation;
