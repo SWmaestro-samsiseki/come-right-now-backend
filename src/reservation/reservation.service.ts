@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { ResponseSeatDTO } from 'src/reservation-events/dto/response-seat.dto';
@@ -52,5 +52,12 @@ export class ReservationService {
       id: reservationId,
       reservationStatus: ReservationStatus.PENDING,
     });
+  }
+
+  async removeReservationById(reservationId: number) {
+    const result = await this.reservationRepository.delete({ id: reservationId });
+    if (result.affected === 0) {
+      throw new NotFoundException('no reservation');
+    }
   }
 }

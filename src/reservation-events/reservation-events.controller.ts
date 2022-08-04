@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Patch, Post } from '@nestjs/common';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationEventsGateway } from './reservation-events.gateway';
@@ -87,5 +87,12 @@ export class ReservationEventsController {
     } else {
       return { stausCode: 202, message: '이미 만료된 요청입니다!' };
     }
+  }
+
+  @Post('reject-response')
+  async rejectSeatResponse(@Body() body) {
+    const { reservationId } = body;
+    await this.reservationService.removeReservationById(reservationId);
+    return { statusCode: 200 };
   }
 }
