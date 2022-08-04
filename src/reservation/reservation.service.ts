@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
+import { ResponseSeatDTO } from 'src/reservation-events/dto/response-seat.dto';
 import { Repository } from 'typeorm';
 import { Reservation } from './reservation.entity';
 
@@ -44,5 +45,12 @@ export class ReservationService {
     });
 
     return reservations;
+  }
+
+  async responseSeat(reservationId: number): Promise<Reservation> {
+    return this.reservationRepository.save({
+      id: reservationId,
+      reservationStatus: ReservationStatus.PENDING,
+    });
   }
 }
