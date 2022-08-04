@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Store } from './store.entity';
@@ -61,6 +61,10 @@ export class StoreService {
       }
       return false;
     }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
+
+    if (filteredStores.length === 0) {
+      throw new NotFoundException('no store in condition');
+    }
     return filteredStores;
   }
 
@@ -70,6 +74,9 @@ export class StoreService {
         id: storeId,
       },
     });
+    if (!store) {
+      throw new NotFoundException('no store');
+    }
     return store;
   }
 }
