@@ -45,4 +45,11 @@ export class ReservationService {
 
     return reservations;
   }
+
+  async createReservation(
+    numberOfPeople: number,
+    willArrivedAt: Date,
+    userId: string,
+    storeId: string,
+  ): Promise<Reservation> {}
 }
