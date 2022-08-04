@@ -1,7 +1,9 @@
 export class getStoreReservationDTO {
+  reservationID: number;
+
   estimatedTime: Date;
 
-  username: string;
+  userName: string;
 
   numberOfPeople: number;
 
