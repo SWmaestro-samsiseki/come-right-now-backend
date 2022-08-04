@@ -15,7 +15,52 @@ export class StoreController {
     private readonly storeService: StoreService,
   ) {}
 
-  // 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
+  @Get(':id')
+  async getStoreById(@Param('id') id: string) {
+    const store = await this.storeService.getStoreById(id);
+
+    if (!store) {
+      throw new NotFoundException();
+    }
+
+    const {
+      masterName,
+      masterPhone,
+      storeName,
+      storeType,
+      latitude,
+      longitude,
+      introduce,
+      starRate,
+      address,
+      storePhone,
+      businessNumber,
+    } = store;
+
+    const storeWithBusinessHour = {
+      masterName,
+      masterPhone,
+      storeName,
+      storeType,
+      latitude,
+      longitude,
+      introduce,
+      starRate,
+      address,
+      storePhone,
+      businessNumber,
+      openAt: store.businessHours[0].openAt,
+      closeAt: store.businessHours[0].closeAt,
+      storeImage: store.storeImage ? store.storeImage : '',
+      mainMenu1: store.mainMenu1 ? store.mainMenu1 : '',
+      mainMenu2: store.mainMenu2 ? store.mainMenu2 : '',
+      mainMenu3: store.mainMenu3 ? store.mainMenu3 : '',
+    };
+
+    return storeWithBusinessHour;
+  }
+
+  /////////// 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
   @Get()
   async makeData() {
     const c1 = this.categoryRepository.create();
@@ -54,31 +99,5 @@ export class StoreController {
       dummy.businessNumber = 'test';
       await this.storeRepository.save(dummy);
     }
-  }
-
-  @Get(':id')
-  async getStoreById(@Param('id') id: string) {
-    const store = await this.storeService.getStoreById(id);
-
-    if (!store) {
-      throw new NotFoundException();
-    }
-
-    const { storeName, storeType, starRate, address, storePhone, mainMenu1, mainMenu2, mainMenu3 } =
-      store;
-
-    //TODO: openAt, closeAt 추가
-    return {
-      storeName,
-      storeType,
-      starRate,
-      address,
-      storePhone,
-      mainMenu1,
-      mainMenu2,
-      mainMenu3,
-      openAt: store.businessHours[0].openAt,
-      closeAt: store.businessHours[0].closeAt,
-    };
   }
 }

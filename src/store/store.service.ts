@@ -82,7 +82,6 @@ export class StoreService {
         },
       },
     });
-    console.log(store);
     if (!store) {
       throw new NotFoundException('no store');
     }
