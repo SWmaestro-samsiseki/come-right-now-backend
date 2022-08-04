@@ -3,7 +3,7 @@ export class requestSeatDTO {
 
   arrivedAt: Date;
 
-  userID: string;
+  userId: string;
 
   userName: string;
 

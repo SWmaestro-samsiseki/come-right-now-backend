@@ -17,7 +17,7 @@ export class ReservationEventsController {
   @Post('seat-request')
   async findStore(@Body() findStoreDTO: findStoreDTO) {
     const distance = 500;
-    const { longitude, latitude, categories, numberOfPeople, arrivedAt, userID } = findStoreDTO;
+    const { longitude, latitude, categories, numberOfPeople, arrivedAt, userId } = findStoreDTO;
     const socketServer = this.reservationEventsGateway.server;
 
     // 1. 주점 검색
@@ -29,13 +29,13 @@ export class ReservationEventsController {
     );
 
     // 2. 주점으로 이벤트 전송
-    const user = await this.userService.findUser(userID);
+    const user = await this.userService.findUser(userId);
     for (const store of stores) {
       const storeSocketId = storeOnlineMap[store.id];
       const requestSeatDTO: requestSeatDTO = {
         numberOfPeople,
         arrivedAt,
-        userID: user.id,
+        userId: user.id,
         userName: user.name,
         userPhone: user.phone,
         creditRate: user.creditRate,
@@ -56,7 +56,7 @@ export class ReservationEventsController {
     const requestSeatDTO: requestSeatDTO = {
       numberOfPeople: 10,
       arrivedAt: new Date(),
-      userID: user.id,
+      userId: user.id,
       userName: user.name,
       userPhone: user.phone,
       creditRate: user.creditRate,
