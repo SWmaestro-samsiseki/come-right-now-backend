@@ -11,7 +11,7 @@ export class ReservationController {
   async getUserReserved(@Query('id') userId: string) {
     const reservation = await this.reservationService.getReservationByUserId(userId);
     const getUserReservedDTO: getUserReservedDTO = {
-      reservationID: reservation.id,
+      reservationId: reservation.id,
       arrivalTime: reservation.arrivalTime,
       numberOfPeople: reservation.peopleNumber,
       storeId: reservation.store.id,
@@ -26,14 +26,14 @@ export class ReservationController {
     const result: getStoreReservationDTO[] = [];
     for (const reservation of reservations) {
       const { estimatedTime } = reservation;
-      const reservationID = reservation.id;
+      const reservationId = reservation.id;
       const numberOfPeople = reservation.peopleNumber;
       const userName = reservation.user.name;
       const userPhone = reservation.user.phone;
       const creditRate = reservation.user.creditRate;
 
       const getStoreReservationDTO: getStoreReservationDTO = {
-        reservationID,
+        reservationId,
         estimatedTime,
         numberOfPeople,
         userName,

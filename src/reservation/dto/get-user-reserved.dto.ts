@@ -1,5 +1,5 @@
 export class getUserReservedDTO {
-  reservationID: number;
+  reservationId: number;
 
   arrivalTime: Date;
 
