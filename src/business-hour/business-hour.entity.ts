@@ -11,10 +11,10 @@ export class BusinessHour extends BaseEntity {
   public businessDay: DayOfWeek;
 
   @Column({ type: 'time', nullable: false })
-  public OpenAt: Date;
+  public openAt: Date;
 
   @Column({ type: 'time', nullable: false })
-  public CloseAt: Date;
+  public closeAt: Date;
 
   @ManyToOne(() => Store, (store) => store.businessHours, {
     createForeignKeyConstraints: false,

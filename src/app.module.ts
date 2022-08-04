@@ -12,6 +12,7 @@ import { StoreTableModule } from './store-table/store-table.module';
 import { BusinessHourModule } from './business-hour/business-hour.module';
 import { AccountModule } from './account/account.module';
 import { ReservationEventsModule } from './reservation-events/reservation-events.module';
+import { DateUtilModule } from './date-util/date-util.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ReservationEventsModule } from './reservation-events/reservation-events
     BusinessHourModule,
     AccountModule,
     ReservationEventsModule,
+    DateUtilModule,
   ],
   controllers: [AppController],
   providers: [AppService],

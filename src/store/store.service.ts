@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { Store } from './store.entity';
 
 @Injectable()
 export class StoreService {
-  constructor(@InjectRepository(Store) private storeRepository: Repository<Store>) {}
+  constructor(
+    @InjectRepository(Store) private storeRepository: Repository<Store>,
+    private readonly dateUtilService: DateUtilService,
+  ) {}
 
   // 각도를 라디안으로 변환
   private degreeToRadian(degree: number): number {
@@ -70,10 +74,15 @@ export class StoreService {
 
   async getStoreById(storeId: string) {
     const store = await this.storeRepository.findOne({
+      relations: ['businessHours'],
       where: {
         id: storeId,
+        businessHours: {
+          businessDay: this.dateUtilService.getDayOfWeekToday(),
+        },
       },
     });
+    console.log(store);
     if (!store) {
       throw new NotFoundException('no store');
     }
