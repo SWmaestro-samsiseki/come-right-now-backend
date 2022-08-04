@@ -67,4 +67,18 @@ export class ReservationEventsController {
       isSuccess: true,
     };
   }
+
+  @Post('test/seat-reservation')
+  async testReserved() {
+    const socketServer = this.reservationEventsGateway.server;
+    const data = {
+      userName: '최지윤',
+      phone: '010-1234-1234',
+      creditRate: 70,
+      peopleNumber: 6,
+      estimatedTime: '18:45',
+    };
+    const storeSocketId = storeOnlineMap['u2'];
+    socketServer.to(storeSocketId).emit('server.make-reservation.store', data);
+  }
 }
