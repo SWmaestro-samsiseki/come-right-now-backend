@@ -70,13 +70,16 @@ export class ReservationEventsController {
 
   @Post('test/seat-reservation')
   async testReserved() {
+    const date = new Date();
+    const dateString = date.toLocaleTimeString();
+    const time = dateString.slice(0, dateString.indexOf(':', 7));
     const socketServer = this.reservationEventsGateway.server;
     const data = {
       userName: '최지윤',
       phone: '010-1234-1234',
       creditRate: 70,
       peopleNumber: 6,
-      estimatedTime: '18:45',
+      estimatedTime: time,
     };
     const storeSocketId = storeOnlineMap['u2'];
     socketServer.to(storeSocketId).emit('server.make-reservation.store', data);
