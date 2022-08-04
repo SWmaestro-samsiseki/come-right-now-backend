@@ -40,12 +40,7 @@ describe('StoreService', () => {
       const userLongitude = 0;
       const userLatitude = 0;
 
-      const stores = await storeService.findCandidateStores(
-        userLongitude,
-        userLatitude,
-        ['testCategoriy'],
-        0,
-      );
+      const stores = await storeService.findCandidateStores(userLongitude, userLatitude, [1], 0);
 
       expect(stores[0].id).toBe('testId1');
       expect(stores.length).toBe(1);
