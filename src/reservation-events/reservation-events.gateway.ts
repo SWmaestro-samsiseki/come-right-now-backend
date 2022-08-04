@@ -54,7 +54,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     console.log('***connected***');
     console.log('<User Online>');
     console.log(userOnlineMap);
-    console.log('Store Online>');
+    console.log('<Store Online>');
     console.log(storeOnlineMap);
   }
 }

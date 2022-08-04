@@ -11,9 +11,10 @@ export class ReservationController {
   async getUserReserved(@Query('id') userId: string) {
     const reservation = await this.reservationService.getReservationByUserId(userId);
     const getUserReservedDTO: getUserReservedDTO = {
+      reservationID: reservation.id,
       arrivalTime: reservation.arrivalTime,
       numberOfPeople: reservation.peopleNumber,
-      storeId: reservation.store.id,
+      storeID: reservation.store.id,
     };
 
     return getUserReservedDTO;
@@ -25,15 +26,17 @@ export class ReservationController {
     const result: getStoreReservationDTO[] = [];
     for (const reservation of reservations) {
       const { estimatedTime } = reservation;
+      const reservationID = reservation.id;
       const numberOfPeople = reservation.peopleNumber;
-      const username = reservation.user.name;
+      const userName = reservation.user.name;
       const userPhone = reservation.user.phone;
       const creditRate = reservation.user.creditRate;
 
       const getStoreReservationDTO: getStoreReservationDTO = {
+        reservationID,
         estimatedTime,
         numberOfPeople,
-        username,
+        userName,
         userPhone,
         creditRate,
       };
