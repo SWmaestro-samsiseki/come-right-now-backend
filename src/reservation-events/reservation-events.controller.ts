@@ -72,15 +72,15 @@ export class ReservationEventsController {
     };
   }
 
-  @Patch('seat-response')
-  responseSeat(@Body() responseSeatDTO: ResponseSeatDTO) {
+  @Patch('accept-response')
+  acceptSeatResponse(@Body() responseSeatDTO: ResponseSeatDTO) {
     const socketServer = this.reservationEventsGateway.server;
     const { userId, reservationId, requestTime } = responseSeatDTO;
     const now = new Date();
     const availableTime = new Date(requestTime);
     availableTime.setMinutes(availableTime.getMinutes() + 10); //FIXME: 타임아웃 시간 config로 관리
     if (availableTime >= now) {
-      this.reservationService.responseSeat(reservationId);
+      this.reservationService.updateReservationStatusToPending(reservationId);
       const userSocketId = userOnlineMap[userId];
       socketServer.to(userSocketId).emit('server.available-seat.user', { userId, reservationId });
       return { statusCode: 200 };
