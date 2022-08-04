@@ -47,7 +47,7 @@ export class ReservationService {
     return reservations;
   }
 
-  async responseSeat(reservationId: number): Promise<Reservation> {
+  async updateReservationStatusToPending(reservationId: number): Promise<Reservation> {
     return this.reservationRepository.save({
       id: reservationId,
       reservationStatus: ReservationStatus.PENDING,
