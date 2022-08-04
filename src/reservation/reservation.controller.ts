@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { getStoreReservationDTO } from './dto/get-store-reservation.dto';
 import { getUserReservedDTO } from './dto/get-user-reserved.dto';
 import { ReservationService } from './reservation.service';
@@ -7,9 +7,9 @@ import { ReservationService } from './reservation.service';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
-  @Get('user')
-  async getUserReserved(@Query('id') userId: string) {
-    const reservation = await this.reservationService.getReservationByUserId(userId);
+  @Get('user/:id')
+  async getUserReserved(@Query('status') status: string, @Param('id') userId: string) {
+    const reservation = await this.reservationService.getReservationByUserId(status, userId);
     const getUserReservedDTO: getUserReservedDTO = {
       reservationId: reservation.id,
       arrivalTime: reservation.arrivalTime,
@@ -20,10 +20,10 @@ export class ReservationController {
     return getUserReservedDTO;
   }
 
-  @Get('store')
-  async getStoreReservedAndPending(@Query('type') type: string, @Query('id') storeId: string) {
-    const reservations = await this.reservationService.getStoreReservationByStatus(type, storeId);
-    const result: getStoreReservationDTO[] = [];
+  @Get('store/:id')
+  async getStoreReservedAndPending(@Query('status') status: string, @Param('id') storeId: string) {
+    const reservations = await this.reservationService.getStoreReservationByStatus(status, storeId);
+    const results: getStoreReservationDTO[] = [];
     for (const reservation of reservations) {
       const { estimatedTime } = reservation;
       const reservationId = reservation.id;
@@ -41,9 +41,9 @@ export class ReservationController {
         creditRate,
       };
 
-      result.push(getStoreReservationDTO);
+      results.push(getStoreReservationDTO);
     }
 
-    return result;
+    return results;
   }
 }
