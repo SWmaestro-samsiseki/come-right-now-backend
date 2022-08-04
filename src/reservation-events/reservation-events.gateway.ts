@@ -20,8 +20,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   @WebSocketServer() public server: Server;
   constructor(private readonly accountService: AccountService) {}
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    const id = socket.data.uuid;
-    const userType = socket.data.userType;
+    const { uuid: id, userType } = socket.data;
     if (userType === 'USER') {
       if (id in userOnlineMap) {
         delete userOnlineMap[id];
@@ -41,15 +40,16 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   handleConnection(@ConnectedSocket() socket: Socket) {
     const token = socket.handshake.headers.auth as string;
     const payload = this.accountService.getPayload(token);
-    const id = payload.uuid;
-    if (payload.userType === 'USER') {
-      userOnlineMap[id] = socket.id;
-    } else if (payload.userType === 'STORE') {
-      storeOnlineMap[id] = socket.id;
+    const { uuid, userType } = payload;
+    if (userType === 'USER') {
+      userOnlineMap[uuid] = socket.id;
+    } else if (userType === 'STORE') {
+      storeOnlineMap[uuid] = socket.id;
     }
-
-    socket.data.uuid = id;
-    socket.data.userType = payload.userType;
+    socket.data = {
+      uuid,
+      userType,
+    };
     //TODO: 로그로 전환
     console.log('***connected***');
     console.log('<User Online>');
