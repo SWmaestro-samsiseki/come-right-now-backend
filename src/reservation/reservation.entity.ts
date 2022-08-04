@@ -11,10 +11,10 @@ export class Reservation extends BaseEntity {
   @Column({ type: 'int', nullable: false })
   public peopleNumber: number;
 
-  @Column({ type: 'timestamp', nullable: false })
+  @Column({ type: 'datetime', nullable: false })
   public estimatedTime: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   public arrivalTime: Date;
 
   @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.RESERVED })
