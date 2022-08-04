@@ -5,5 +5,5 @@ export class getUserReservedDTO {
 
   numberOfPeople: number;
 
-  storeID: string;
+  storeId: string;
 }

@@ -14,7 +14,7 @@ export class ReservationController {
       reservationID: reservation.id,
       arrivalTime: reservation.arrivalTime,
       numberOfPeople: reservation.peopleNumber,
-      storeID: reservation.store.id,
+      storeId: reservation.store.id,
     };
 
     return getUserReservedDTO;
