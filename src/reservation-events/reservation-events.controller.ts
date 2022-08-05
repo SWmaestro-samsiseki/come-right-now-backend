@@ -1,9 +1,13 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Patch Post } from '@nestjs/common';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationEventsGateway } from './reservation-events.gateway';
 import { findStoreDTO } from './dto/find-store.dto';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
+import { ResponseSeatDTO } from './dto/response-seat.dto';
+import { ReservationService } from 'src/reservation/reservation.service';
+import { userOnlineMap } from './onlineMaps/user.onlineMap';
 import { ReservationService } from 'src/reservation/reservation.service';
 
 @Controller('reservation-events')
@@ -11,6 +15,7 @@ export class ReservationEventsController {
   constructor(
     private readonly storeService: StoreService,
     private readonly userService: UserService,
+    private readonly reservationService: ReservationService,
     private readonly reservationEventsGateway: ReservationEventsGateway,
     private readonly reservationService: ReservationService,
   ) {}
@@ -74,6 +79,22 @@ export class ReservationEventsController {
       isSuccess: true,
     };
   }
+  
+  @Patch('seat-response')
+  responseSeat(@Body() responseSeatDTO: ResponseSeatDTO) {
+    const socketServer = this.reservationEventsGateway.server;
+    const { userId, reservationId, requestTime } = responseSeatDTO;
+    const now = new Date();
+    const availableTime = new Date(requestTime);
+    availableTime.setMinutes(availableTime.getMinutes() + 10); //FIXME: 타임아웃 시간 config로 관리
+    if (availableTime >= now) {
+      this.reservationService.responseSeat(reservationId);
+      const userSocketId = userOnlineMap[userId];
+      socketServer.to(userSocketId).emit('server.available-seat.user', { userId, reservationId });
+      return { statusCode: 200 };
+    } else {
+      return { stausCode: 202, message: '이미 만료된 요청입니다!' };
+    }
 
   @Post('test/seat-reservation')
   async testReserved() {
