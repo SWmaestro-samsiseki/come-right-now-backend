@@ -8,7 +8,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get('/myInfo')
+  @Get('/my-info')
   @UseGuards(AuthGuard())
   getUserInfo(@getAccount() account): Promise<UserInfoDTO> {
     const { id } = account;
