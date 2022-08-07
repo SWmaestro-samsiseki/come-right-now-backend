@@ -1,9 +1,9 @@
-export class findStoreDTO {
+export class userFindStoreServerDTO {
   categories: number[];
 
   numberOfPeople: number;
 
-  willArrivedAt: Date;
+  delayMinutes: number;
 
   userId: string;
 

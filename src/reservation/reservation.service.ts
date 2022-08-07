@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
-import { ResponseSeatDTO } from 'src/reservation-events/dto/response-seat.dto';
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
+import { createReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 
 @Injectable()
@@ -59,18 +59,15 @@ export class ReservationService {
       id: reservationId,
       reservationStatus: ReservationStatus.PENDING,
     });
-    
-  async createReservation(
-    numberOfPeople: number,
-    willArrivedAt: Date,
-    userId: string,
-    storeId: string,
-  ): Promise<Reservation> {
+  }
+  async createReservation(createReservationDTO: createReservationDTO): Promise<Reservation> {
     const reservation = this.reservationRepository.create();
-    reservation.peopleNumber = numberOfPeople;
-    reservation.estimatedTime = willArrivedAt;
+    const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
+
     reservation.reservationStatus = ReservationStatus.REQUESTED;
-    reservation.reservedTable = '1,2';
+    reservation.peopleNumber = numberOfPeople;
+    reservation.estimatedTime = estimatedTime;
+
     const store = await this.storeRepository.findOne({
       where: {
         id: storeId,
