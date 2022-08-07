@@ -112,7 +112,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     for (const store of stores) {
       try {
         const storeSocketId = storeOnlineMap[store.id];
-        const estimatedTime = this.dateUtilService.getEstimatedTime(
+        const estimatedTime = await this.dateUtilService.getEstimatedTime(
           latitude,
           longitude,
           store.latitude,
@@ -139,7 +139,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         return result;
       }
     }
-
     return result;
   }
 }

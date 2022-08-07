@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 import { DayOfWeek } from 'src/enum/days-of-week.enum';
 
 @Injectable()
@@ -23,13 +24,13 @@ export class DateUtilService {
     return date;
   }
 
-  getEstimatedTime(
+  async getEstimatedTime(
     userLatitude: number,
     userLongitude: number,
     storeLatitude: number,
     storeLongitude: number,
     delayMinutes: number,
-  ): Date {
+  ): Promise<Date> {
     let nowDate = new Date();
     const ob = this.httpService.post(
       'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function',
@@ -51,11 +52,9 @@ export class DateUtilService {
       },
     );
 
-    ob.subscribe((result) => {
-      const totalTime: number = result.data.features[0].properties.totalTime;
-      nowDate = this.addMinute([delayMinutes, totalTime], nowDate);
-    });
-
+    const result = await firstValueFrom(ob);
+    const totalTime: number = result.data.features[0].properties.totalTime;
+    nowDate = this.addMinute([delayMinutes, totalTime], nowDate);
     return nowDate;
   }
 }
