@@ -57,7 +57,6 @@ export class StoreService {
       });
       totalStores.push(...stores);
     } //원하는 카테고리를 가진 stores
-
     const filteredStores = totalStores.filter((store) => {
       const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
       if (d <= distance) {

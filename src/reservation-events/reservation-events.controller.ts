@@ -1,14 +1,10 @@
-import { Body, Controller, Patch, Post } from '@nestjs/common';
-import { BadRequestException, Body, Controller, Patch Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Patch, Post } from '@nestjs/common';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationEventsGateway } from './reservation-events.gateway';
-import { findStoreDTO } from './dto/find-store.dto';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
-import { ResponseSeatDTO } from './dto/response-seat.dto';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { userOnlineMap } from './onlineMaps/user.onlineMap';
-import { ReservationService } from 'src/reservation/reservation.service';
 
 @Controller('reservation-events')
 export class ReservationEventsController {
@@ -17,11 +13,10 @@ export class ReservationEventsController {
     private readonly userService: UserService,
     private readonly reservationService: ReservationService,
     private readonly reservationEventsGateway: ReservationEventsGateway,
-    private readonly reservationService: ReservationService,
   ) {}
 
   @Post('seat-request')
-  async findStore(@Body() findStoreDTO: findStoreDTO) {
+  async findStore(@Body() findStoreDTO) {
     const distance = 500;
     const { longitude, latitude, categories, numberOfPeople, willArrivedAt, userId } = findStoreDTO;
     const socketServer = this.reservationEventsGateway.server;
@@ -79,9 +74,9 @@ export class ReservationEventsController {
       isSuccess: true,
     };
   }
-  
+
   @Patch('seat-response')
-  responseSeat(@Body() responseSeatDTO: ResponseSeatDTO) {
+  responseSeat(@Body() responseSeatDTO) {
     const socketServer = this.reservationEventsGateway.server;
     const { userId, reservationId, requestTime } = responseSeatDTO;
     const now = new Date();
@@ -95,7 +90,7 @@ export class ReservationEventsController {
     } else {
       return { stausCode: 202, message: '이미 만료된 요청입니다!' };
     }
-
+  }
   @Post('test/seat-reservation')
   async testReserved() {
     const date = new Date();

@@ -5,9 +5,10 @@ import { ReservationEventsController } from './reservation-events.controller';
 import { StoreModule } from 'src/store/store.module';
 import { UserModule } from 'src/user/user.module';
 import { ReservationModule } from 'src/reservation/reservation.module';
+import { DateUtilModule } from 'src/date-util/date-util.module';
 
 @Module({
-  imports: [AccountModule, StoreModule, UserModule, ReservationModule],
+  imports: [AccountModule, StoreModule, UserModule, ReservationModule, DateUtilModule],
   providers: [ReservationEventsGateway],
   exports: [ReservationEventsGateway],
   controllers: [ReservationEventsController],
