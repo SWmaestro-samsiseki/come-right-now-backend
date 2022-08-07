@@ -75,7 +75,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   }
 
   @SubscribeMessage('user.find-store.server')
-  async userFindStoreToserver(
+  async userFindStoreToServer(
     @ConnectedSocket() socket: Socket,
     @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
   ) {
@@ -132,7 +132,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           userId,
           estimatedTime,
         };
-        socket.to(storeSocketId).emit('server.request-seat.store', serverFindStoreStoreDTO);
+        socket.to(storeSocketId).emit('server.find-store.store', serverFindStoreStoreDTO);
       } catch (e) {
         result.isSuccess = false;
         result.datas = e;
