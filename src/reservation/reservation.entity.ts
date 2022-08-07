@@ -1,6 +1,13 @@
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
-import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  BaseEntity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 import { ReservationStatus } from '../enum/reservation-status.enum';
 
 @Entity()
@@ -20,7 +27,7 @@ export class Reservation extends BaseEntity {
   @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.RESERVED })
   public reservationStatus: ReservationStatus;
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   public reservedTable: string;
 
   @ManyToOne(() => User, (user) => user.reservations, {
@@ -32,4 +39,7 @@ export class Reservation extends BaseEntity {
     createForeignKeyConstraints: false,
   })
   store: Store;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
