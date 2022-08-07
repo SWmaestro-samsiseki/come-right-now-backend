@@ -1,10 +1,9 @@
-import { BadRequestException, Body, Controller, Patch, Post } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 import { StoreService } from 'src/store/store.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationEventsGateway } from './reservation-events.gateway';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 import { ReservationService } from 'src/reservation/reservation.service';
-import { userOnlineMap } from './onlineMaps/user.onlineMap';
 
 @Controller('reservation-events')
 export class ReservationEventsController {
@@ -14,44 +13,6 @@ export class ReservationEventsController {
     private readonly reservationService: ReservationService,
     private readonly reservationEventsGateway: ReservationEventsGateway,
   ) {}
-
-  @Post('seat-request')
-  async findStore(@Body() findStoreDTO) {
-    const distance = 500;
-    const { longitude, latitude, categories, numberOfPeople, willArrivedAt, userId } = findStoreDTO;
-    const socketServer = this.reservationEventsGateway.server;
-
-    // 1. 주점 검색
-    const stores = await this.storeService.findCandidateStores(
-      longitude,
-      latitude,
-      categories,
-      distance,
-    );
-
-    // 2. 주점으로 이벤트 전송
-    const user = await this.userService.findUser(userId);
-    for (const store of stores) {
-      try {
-        const storeSocketId = storeOnlineMap[store.id];
-        const reservation = await this.reservationService.createReservation(
-          numberOfPeople,
-          willArrivedAt,
-          user.id,
-          store.id,
-        );
-        socketServer.to(storeSocketId).emit('server.request-seat.store', {
-          reservationId: reservation.id,
-        });
-      } catch (e) {
-        throw new BadRequestException();
-      }
-    }
-
-    return {
-      isSuccess: true,
-    };
-  }
 
   /////////////test api for frontend
 
@@ -73,23 +34,6 @@ export class ReservationEventsController {
     return {
       isSuccess: true,
     };
-  }
-
-  @Patch('seat-response')
-  responseSeat(@Body() responseSeatDTO) {
-    const socketServer = this.reservationEventsGateway.server;
-    const { userId, reservationId, requestTime } = responseSeatDTO;
-    const now = new Date();
-    const availableTime = new Date(requestTime);
-    availableTime.setMinutes(availableTime.getMinutes() + 10); //FIXME: 타임아웃 시간 config로 관리
-    if (availableTime >= now) {
-      this.reservationService.responseSeat(reservationId);
-      const userSocketId = userOnlineMap[userId];
-      socketServer.to(userSocketId).emit('server.available-seat.user', { userId, reservationId });
-      return { statusCode: 200 };
-    } else {
-      return { stausCode: 202, message: '이미 만료된 요청입니다!' };
-    }
   }
   @Post('test/seat-reservation')
   async testReserved() {
