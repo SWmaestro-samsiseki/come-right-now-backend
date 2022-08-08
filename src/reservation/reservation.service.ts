@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
@@ -83,5 +83,20 @@ export class ReservationService {
     reservation.user = user;
     const result = await this.reservationRepository.save(reservation);
     return result.id;
+  }
+
+  async getReservationById(id: number) {
+    const reservation = this.reservationRepository.findOne({
+      relations: ['store', 'user'],
+      where: {
+        id,
+      },
+    });
+
+    if (!reservation) {
+      throw new NotFoundException();
+    }
+
+    return reservation;
   }
 }
