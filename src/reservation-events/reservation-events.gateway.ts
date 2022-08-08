@@ -13,10 +13,10 @@ import { userOnlineMap } from './onlineMaps/user.onlineMap';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 import { userFindStoreServerDTO } from './dto/user-find-store-server.dto';
 import { StoreService } from 'src/store/store.service';
-import { returnFindStoreServerDTO } from './dto/return-find-store-server.dto';
 import { DateUtilService } from 'src/date-util/date-util.service';
-import { serverFindStoreStoreDTO } from './dto/server-find-store-store.dto';
 import { UserService } from 'src/user/user.service';
+import { ReservationService } from 'src/reservation/reservation.service';
+import { createReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 
 @WebSocketGateway({
   cors: {
@@ -32,6 +32,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
     private readonly userService: UserService,
+    private readonly reservationService: ReservationService,
   ) {}
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -79,12 +80,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
   ) {
+    const userId = socket.data.uuid;
     const distance = 500;
     const {
       categories,
       numberOfPeople,
       delayMinutes,
-      userId,
       longitude,
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
@@ -96,19 +97,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       categories,
       distance,
     );
-
-    if (stores.length === 0) {
-      const result: returnFindStoreServerDTO = {
-        isSuccess: false,
-      };
-      return result;
-    }
     // 2. 주점으로 이벤트 전송
-    const result: returnFindStoreServerDTO = {
-      isSuccess: true,
-      datas: [],
-    };
-    const user = await this.userService.getUserInfo(userId);
     for (const store of stores) {
       try {
         const storeSocketId = storeOnlineMap[store.id];
@@ -119,26 +108,21 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           store.longitude,
           delayMinutes,
         );
-        result.datas.push({
+        const createReservationDTO: createReservationDTO = {
+          numberOfPeople,
           estimatedTime,
-          numberOfPeople,
-          storeId: store.id,
-        });
-        const serverFindStoreStoreDTO: serverFindStoreStoreDTO = {
-          userName: user.name,
-          userPhone: user.phone,
-          creditRate: user.creditRate,
-          numberOfPeople,
           userId,
-          estimatedTime,
+          storeId: store.id,
         };
-        socket.to(storeSocketId).emit('server.find-store.store', serverFindStoreStoreDTO);
+        const reservationId = await this.reservationService.createReservation(createReservationDTO);
+        socket.to(storeSocketId).emit('server.find-store.store', {
+          reservationId,
+        });
       } catch (e) {
-        result.isSuccess = false;
-        result.datas = e;
-        return result;
+        return false;
       }
     }
-    return result;
+
+    return true;
   }
 }

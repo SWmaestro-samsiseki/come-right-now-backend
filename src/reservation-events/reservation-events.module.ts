@@ -8,7 +8,14 @@ import { ReservationModule } from 'src/reservation/reservation.module';
 import { DateUtilModule } from 'src/date-util/date-util.module';
 
 @Module({
-  imports: [AccountModule, StoreModule, UserModule, ReservationModule, DateUtilModule],
+  imports: [
+    AccountModule,
+    StoreModule,
+    UserModule,
+    ReservationModule,
+    DateUtilModule,
+    ReservationModule,
+  ],
   providers: [ReservationEventsGateway],
   exports: [ReservationEventsGateway],
   controllers: [ReservationEventsController],
