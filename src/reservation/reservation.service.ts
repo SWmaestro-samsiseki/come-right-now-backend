@@ -66,7 +66,7 @@ export class ReservationService {
     const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
 
     reservation.reservationStatus = ReservationStatus.REQUESTED;
-    reservation.peopleNumber = numberOfPeople;
+    reservation.numberOfPeople = numberOfPeople;
     reservation.estimatedTime = estimatedTime;
 
     const store = await this.storeRepository.findOne({

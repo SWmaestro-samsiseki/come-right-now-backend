@@ -45,7 +45,7 @@ export class ReservationEventsController {
       userName: '최지윤',
       phone: '010-1234-1234',
       creditRate: 70,
-      peopleNumber: 6,
+      numberOfPeople: 6,
       estimatedTime: time,
     };
     const storeSocketId = storeOnlineMap['u2'];
