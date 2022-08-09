@@ -123,11 +123,11 @@ export class StoreService {
       businessNumber,
       openAt: businessHours[0].openAt,
       closeAt: businessHours[0].closeAt,
-      storeImage,
+      storeImage: storeImage ? storeImage : '',
       mainMenu1: mainMenu1 ? mainMenu1 : '',
       mainMenu2: mainMenu2 ? mainMenu2 : '',
       mainMenu3: mainMenu3 ? mainMenu3 : '',
-      mainMenuImage,
+      mainMenuImage: mainMenuImage ? mainMenuImage : '',
     };
     return storeWithBusinessHour;
   }
