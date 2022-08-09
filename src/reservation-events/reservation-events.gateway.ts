@@ -116,9 +116,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           storeId: store.id,
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);
-        socket.to(storeSocketId).emit('server.find-store.store', {
-          reservationId,
-        });
+        socket.to(storeSocketId).emit('server.find-store.store', reservationId);
       } catch (e) {
         console.log(e);
         return false;
