@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { setDefaultResultOrder } from 'dns';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
@@ -96,8 +97,11 @@ export class ReservationService {
 
   async updateReservationStatus(reservationId: number, status: string) {
     const reservationStatus = ReservationStatus[status];
+    const result = await this.reservationRepository.update(reservationId, { reservationStatus });
 
-    return await this.reservationRepository.update(reservationId, { reservationStatus });
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
   }
 
   async deleteReservation(reservationId: number) {
