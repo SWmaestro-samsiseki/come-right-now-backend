@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { createReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 import { ReservationService } from './reservation.service';
@@ -37,5 +37,15 @@ export class ReservationController {
   @Get(':id')
   async getReservationById(@Param('id', ParseIntPipe) id: number) {
     return await this.reservationService.getReservationById(id);
+  }
+
+  @Delete(':id')
+  async deleteReservation(@Param('id') reservationId: number): Promise<Boolean> {
+    try {
+      await this.reservationService.deleteReservation(reservationId);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

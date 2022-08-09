@@ -105,4 +105,12 @@ export class ReservationService {
 
     return await this.reservationRepository.update(reservationId, { reservationStatus });
   }
+
+  async deleteReservation(reservationId: number) {
+    const result = await this.reservationRepository.delete({ id: reservationId });
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+  }
 }
