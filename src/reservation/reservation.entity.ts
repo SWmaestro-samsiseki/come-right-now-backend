@@ -40,6 +40,6 @@ export class Reservation extends BaseEntity {
   })
   store: Store;
 
-  @CreateDateColumn()
+  @Column()
   createdAt: Date;
 }
