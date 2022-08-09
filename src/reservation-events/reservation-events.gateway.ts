@@ -163,7 +163,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   async makeReservationEvent(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: { storeId: string; reservationId: number },
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     // 임시 로그
     console.log('<<on>> make-reservation event listening..');
 
