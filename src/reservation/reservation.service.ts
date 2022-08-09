@@ -54,12 +54,12 @@ export class ReservationService {
     return reservations;
   }
 
-  async responseSeat(reservationId: number): Promise<Reservation> {
-    return this.reservationRepository.save({
-      id: reservationId,
-      reservationStatus: ReservationStatus.PENDING,
-    });
-  }
+  // async responseSeat(reservationId: number): Promise<Reservation> {
+  //   return this.reservationRepository.save({
+  //     id: reservationId,
+  //     reservationStatus: ReservationStatus.PENDING,
+  //   });
+  // }
 
   async createReservation(createReservationDTO: createReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
@@ -98,5 +98,11 @@ export class ReservationService {
     }
 
     return reservation;
+  }
+
+  async updateReservationStatus(reservationId: number, status: string) {
+    const reservationStatus = ReservationStatus[status];
+
+    return await this.reservationRepository.update(reservationId, { reservationStatus });
   }
 }
