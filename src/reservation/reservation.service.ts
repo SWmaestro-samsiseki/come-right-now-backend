@@ -60,7 +60,8 @@ export class ReservationService {
       reservationStatus: ReservationStatus.PENDING,
     });
   }
-  async createReservation(createReservationDTO: createReservationDTO): Promise<Reservation> {
+
+  async createReservation(createReservationDTO: createReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
 
@@ -81,6 +82,6 @@ export class ReservationService {
     reservation.store = store;
     reservation.user = user;
     const result = await this.reservationRepository.save(reservation);
-    return result;
+    return result.id;
   }
 }

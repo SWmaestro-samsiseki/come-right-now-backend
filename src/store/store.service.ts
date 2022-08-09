@@ -45,18 +45,19 @@ export class StoreService {
     categories: number[],
     distance: number,
   ): Promise<Store[]> {
-    const totalStores = [];
-    for (let i = 0; i < categories.length; i++) {
-      const stores = await this.storeRepository.find({
-        relations: ['categories'],
-        where: {
-          categories: {
-            id: categories[i],
-          },
+    const whereOptions = [];
+    for (const category of categories) {
+      whereOptions.push({
+        categories: {
+          id: category,
         },
       });
-      totalStores.push(...stores);
-    } //원하는 카테고리를 가진 stores
+    }
+    const totalStores = await this.storeRepository.find({
+      relations: ['categories'],
+      where: whereOptions,
+    });
+    //원하는 카테고리를 가진 stores
     const filteredStores = totalStores.filter((store) => {
       const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
       if (d <= distance) {
