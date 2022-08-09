@@ -3,7 +3,7 @@ export class StoreInfoDTO {
 
   masterName: string;
 
-  storeName: string;
+  businessName: string;
 
   storeType: string;
 

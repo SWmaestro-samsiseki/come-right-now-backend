@@ -91,7 +91,7 @@ export class StoreService {
     const {
       masterName,
       masterPhone,
-      storeName,
+      businessName,
       storeType,
       latitude,
       longitude,
@@ -112,7 +112,7 @@ export class StoreService {
       storeId,
       masterName,
       masterPhone,
-      storeName,
+      businessName,
       storeType,
       latitude,
       longitude,
