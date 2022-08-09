@@ -8,9 +8,7 @@ import { ReservationService } from 'src/reservation/reservation.service';
 @Controller('reservation-events')
 export class ReservationEventsController {
   constructor(
-    private readonly storeService: StoreService,
     private readonly userService: UserService,
-    private readonly reservationService: ReservationService,
     private readonly reservationEventsGateway: ReservationEventsGateway,
   ) {}
 

@@ -17,6 +17,7 @@ import { DateUtilService } from 'src/date-util/date-util.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { createReservationDTO } from 'src/reservation/dto/create-reservation.dto';
+import { ReservationStatus } from 'src/enum/reservation-status.enum';
 
 @WebSocketGateway({
   cors: {
@@ -124,5 +125,35 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     }
 
     return true;
+  }
+
+  @SubscribeMessage('store.accept-seat.server')
+  async acceptSeatEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: { reservationId: number; userId: string },
+  ) {
+    const { userId, reservationId } = data;
+    try {
+      const reservation = await this.reservationService.getReservationById(reservationId);
+      // TODO: createAt 칼럼 생성 후 응답 시간 만료 2차 확인
+      const { reservationStatus } = reservation;
+      if (reservationStatus !== ReservationStatus.REQUESTED) {
+        return {
+          isSuccess: false,
+          message: '이미 처리된 요청입니다.',
+        };
+      }
+      await this.reservationService.updateReservationStatus(reservationId, 'PENDING');
+      const userSocketId = storeOnlineMap[userId];
+      socket.to(userSocketId).emit('server.available-store.user', reservationId);
+      return {
+        isSuccess: true,
+      };
+    } catch (e) {
+      return {
+        isSuccess: false,
+        message: '만료된 요청입니다.',
+      };
+    }
   }
 }
