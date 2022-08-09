@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { setDefaultResultOrder } from 'dns';
+import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
@@ -14,6 +14,7 @@ export class ReservationService {
     @InjectRepository(Reservation) private readonly reservationRepository: Repository<Reservation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
+    private readonly dateUtilService: DateUtilService,
   ) {}
 
   async getReservationByUserId(status: string, userId: string) {
@@ -59,10 +60,12 @@ export class ReservationService {
   async createReservation(createReservationDTO: createReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
+    const nowDate = this.dateUtilService.getNowDate();
 
     reservation.reservationStatus = ReservationStatus.REQUESTED;
     reservation.numberOfPeople = numberOfPeople;
     reservation.estimatedTime = estimatedTime;
+    reservation.createdAt = nowDate;
 
     const store = await this.storeRepository.findOne({
       where: {

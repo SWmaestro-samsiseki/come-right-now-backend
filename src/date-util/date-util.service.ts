@@ -16,11 +16,20 @@ export class DateUtilService {
     return DayOfWeek[dayOfWeekToday];
   }
 
+  getNowDate() {
+    return new Date();
+  }
+
   addMinute(minuteArray: number[], date: Date) {
     for (const minute of minuteArray) {
       date.setMinutes(date.getMinutes() + minute);
     }
 
+    return date;
+  }
+
+  addHour(hour: number, date: Date) {
+    date.setHours(date.getHours() + hour);
     return date;
   }
 
@@ -53,7 +62,7 @@ export class DateUtilService {
     );
 
     const result = await firstValueFrom(ob);
-    const totalTime: number = result.data.features[0].properties.totalTime;
+    const totalTime: number = Math.floor(result.data.features[0].properties.totalTime / 60);
     nowDate = this.addMinute([delayMinutes, totalTime], nowDate);
     return nowDate;
   }
