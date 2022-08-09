@@ -19,45 +19,7 @@ export class StoreController {
   async getStoreById(@Param('id') id: string) {
     const store = await this.storeService.getStoreById(id);
 
-    if (!store) {
-      throw new NotFoundException();
-    }
-
-    const {
-      masterName,
-      masterPhone,
-      storeName,
-      storeType,
-      latitude,
-      longitude,
-      introduce,
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-    } = store;
-
-    const storeWithBusinessHour = {
-      masterName,
-      masterPhone,
-      storeName,
-      storeType,
-      latitude,
-      longitude,
-      introduce,
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-      openAt: store.businessHours[0].openAt,
-      closeAt: store.businessHours[0].closeAt,
-      storeImage: store.storeImage ? store.storeImage : '',
-      mainMenu1: store.mainMenu1 ? store.mainMenu1 : '',
-      mainMenu2: store.mainMenu2 ? store.mainMenu2 : '',
-      mainMenu3: store.mainMenu3 ? store.mainMenu3 : '',
-    };
-
-    return storeWithBusinessHour;
+    return store;
   }
 
   /////////// 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
