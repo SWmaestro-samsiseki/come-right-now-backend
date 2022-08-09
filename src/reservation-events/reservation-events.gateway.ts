@@ -120,6 +120,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           reservationId,
         });
       } catch (e) {
+        console.log(e);
         return false;
       }
     }
@@ -150,6 +151,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         isSuccess: true,
       };
     } catch (e) {
+      console.log(e);
       return {
         isSuccess: false,
         message: '만료된 요청입니다.',
