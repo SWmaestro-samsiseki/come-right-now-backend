@@ -33,13 +33,7 @@ export class ReservationService {
   }
 
   async getStoreReservationByStatus(status: string, storeId: string) {
-    let reservedStatus: ReservationStatus;
-
-    if (status === 'requested') {
-      reservedStatus = ReservationStatus.REQUESTED;
-    } else if (status === 'reserved') {
-      reservedStatus = ReservationStatus.RESERVED;
-    }
+    const reservationStatus = ReservationStatus[status.toUpperCase()];
 
     const reservations = await this.reservationRepository.find({
       relations: ['user', 'store'],
@@ -47,7 +41,7 @@ export class ReservationService {
         store: {
           id: storeId,
         },
-        reservationStatus: reservedStatus,
+        reservationStatus,
       },
     });
 
