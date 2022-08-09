@@ -99,4 +99,18 @@ export class ReservationService {
 
     return reservation;
   }
+
+  async updateReservationStatus(reservationId: number, status: string) {
+    const reservationStatus = ReservationStatus[status];
+
+    return await this.reservationRepository.update(reservationId, { reservationStatus });
+  }
+
+  async deleteReservation(reservationId: number) {
+    const result = await this.reservationRepository.delete({ id: reservationId });
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+  }
 }
