@@ -16,7 +16,7 @@ export class Reservation extends BaseEntity {
   public id: number;
 
   @Column({ type: 'int', nullable: false })
-  public peopleNumber: number;
+  public numberOfPeople: number;
 
   @Column({ type: 'datetime', nullable: false })
   public estimatedTime: Date;
