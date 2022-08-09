@@ -158,4 +158,30 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       };
     }
   }
+
+  @SubscribeMessage('user.make-reservation.server')
+  async makeReservationEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: { storeId: string; reservationId: number },
+  ): Promise<Boolean> {
+    // 임시 로그
+    console.log('<<on>> make-reservation event listening..');
+
+    const { storeId, reservationId } = data;
+    try {
+      // TODO: reservationStatus가 '대기'가 아닐 때 에러처리 (이미 처리됨 or bad request)
+      await this.reservationService.updateReservationStatus(reservationId, 'RESERVED');
+      const storeSocketId = storeOnlineMap[storeId];
+      socket.to(storeSocketId).emit('server.make-reservation.store', reservationId);
+
+      // 임시 로그
+      console.log('<<emit>> make-reservation event from server to store');
+      return true;
+    } catch (e) {
+      // 임시 로그
+      console.log('<<error>>');
+
+      return false;
+    }
+  }
 }

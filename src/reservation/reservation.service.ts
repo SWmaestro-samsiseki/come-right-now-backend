@@ -100,8 +100,11 @@ export class ReservationService {
 
   async updateReservationStatus(reservationId: number, status: string) {
     const reservationStatus = ReservationStatus[status];
+    const result = await this.reservationRepository.update(reservationId, { reservationStatus });
 
-    return await this.reservationRepository.update(reservationId, { reservationStatus });
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
   }
 
   async deleteReservation(reservationId: number) {
