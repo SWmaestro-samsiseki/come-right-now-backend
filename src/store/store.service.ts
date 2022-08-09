@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
+import { StoreInfoDTO } from './dto/store-info.dto';
 import { Store } from './store.entity';
 
 @Injectable()
@@ -72,7 +73,7 @@ export class StoreService {
     return filteredStores;
   }
 
-  async getStoreById(storeId: string) {
+  async getStoreById(storeId: string): Promise<StoreInfoDTO> {
     const store = await this.storeRepository.findOne({
       relations: ['businessHours'],
       where: {
@@ -82,9 +83,52 @@ export class StoreService {
         },
       },
     });
+
     if (!store) {
       throw new NotFoundException('no store');
     }
-    return store;
+
+    const {
+      masterName,
+      masterPhone,
+      storeName,
+      storeType,
+      latitude,
+      longitude,
+      introduce,
+      starRate,
+      address,
+      storePhone,
+      businessNumber,
+      businessHours,
+      storeImage,
+      mainMenu1,
+      mainMenu2,
+      mainMenu3,
+      mainMenuImage,
+    } = store;
+
+    const storeWithBusinessHour: StoreInfoDTO = {
+      storeId,
+      masterName,
+      masterPhone,
+      storeName,
+      storeType,
+      latitude,
+      longitude,
+      introduce,
+      starRate,
+      address,
+      storePhone,
+      businessNumber,
+      openAt: businessHours[0].openAt,
+      closeAt: businessHours[0].closeAt,
+      storeImage: storeImage ? storeImage : '',
+      mainMenu1: mainMenu1 ? mainMenu1 : '',
+      mainMenu2: mainMenu2 ? mainMenu2 : '',
+      mainMenu3: mainMenu3 ? mainMenu3 : '',
+      mainMenuImage: mainMenuImage ? mainMenuImage : '',
+    };
+    return storeWithBusinessHour;
   }
 }

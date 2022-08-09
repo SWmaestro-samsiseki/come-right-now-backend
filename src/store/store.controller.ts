@@ -1,8 +1,11 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from 'src/account/account.entity';
+import { getAccount } from 'src/account/get-account.decorator';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
+import { StoreInfoDTO } from './dto/store-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
 
@@ -15,49 +18,20 @@ export class StoreController {
     private readonly storeService: StoreService,
   ) {}
 
-  @Get(':id')
-  async getStoreById(@Param('id') id: string) {
+  @Get(':id/info')
+  async getStoreById(@Param('id') id: string): Promise<StoreInfoDTO> {
     const store = await this.storeService.getStoreById(id);
 
-    if (!store) {
-      throw new NotFoundException();
-    }
+    return store;
+  }
 
-    const {
-      masterName,
-      masterPhone,
-      storeName,
-      storeType,
-      latitude,
-      longitude,
-      introduce,
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-    } = store;
+  @Get('my-info')
+  @UseGuards(AuthGuard())
+  async getStoreInfo(@getAccount() account): Promise<StoreInfoDTO> {
+    const storeId = account.id;
+    const storeInfo = await this.storeService.getStoreById(storeId);
 
-    const storeWithBusinessHour = {
-      masterName,
-      masterPhone,
-      storeName,
-      storeType,
-      latitude,
-      longitude,
-      introduce,
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-      openAt: store.businessHours[0].openAt,
-      closeAt: store.businessHours[0].closeAt,
-      storeImage: store.storeImage ? store.storeImage : '',
-      mainMenu1: store.mainMenu1 ? store.mainMenu1 : '',
-      mainMenu2: store.mainMenu2 ? store.mainMenu2 : '',
-      mainMenu3: store.mainMenu3 ? store.mainMenu3 : '',
-    };
-
-    return storeWithBusinessHour;
+    return storeInfo;
   }
 
   /////////// 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
