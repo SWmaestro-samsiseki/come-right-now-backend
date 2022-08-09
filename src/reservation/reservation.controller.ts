@@ -34,13 +34,13 @@ export class ReservationController {
     }
   }
 
-  @Get(':id')
+  @Get(':reservationId')
   async getReservationById(@Param('id', ParseIntPipe) id: number) {
     return await this.reservationService.getReservationById(id);
   }
 
   @Delete(':id')
-  async deleteReservation(@Param('id') reservationId: number): Promise<Boolean> {
+  async deleteReservation(@Param('id') reservationId: number): Promise<boolean> {
     try {
       await this.reservationService.deleteReservation(reservationId);
       return true;

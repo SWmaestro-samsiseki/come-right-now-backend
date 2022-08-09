@@ -21,7 +21,9 @@ export class AccountService {
     //if (account && (await bcrypt.compare(password, account.password))) {
     if (account && password === account.password) {
       const payload = { uuid: account.id, email, userType: account.userType };
-      const accessToken = this.jwtService.sign(payload);
+      const accessToken = this.jwtService.sign(payload, {
+        secret: process.env.JWT_SECRET_KEY,
+      });
       return {
         isSuccess: true,
         message: '로그인에 성공했습니다.',
