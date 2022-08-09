@@ -145,7 +145,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         };
       }
       await this.reservationService.updateReservationStatus(reservationId, 'PENDING');
-      const userSocketId = storeOnlineMap[userId];
+      const userSocketId = userOnlineMap[userId];
       socket.to(userSocketId).emit('server.available-seat.user', reservationId);
       return {
         isSuccess: true,
