@@ -2,7 +2,9 @@ import { Controller, Post } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ReservationEventsGateway } from './reservation-events.gateway';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('reservation-events')
 @Controller('reservation-events')
 export class ReservationEventsController {
   constructor(
