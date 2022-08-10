@@ -1,8 +1,10 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { createReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 import { ReservationService } from './reservation.service';
 
+@ApiTags('reservation')
 @Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}

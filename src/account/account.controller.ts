@@ -1,15 +1,17 @@
 import { Body, Controller, Get, Post, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { LoginInputDto, LoginOutputDTO } from './dto/account.dto';
+import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { AccountService } from './account.service';
 import { getAccount } from './get-account.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('account')
 @Controller('account')
 export class AccountController {
   constructor(private accountService: AccountService) {}
 
   @Post('/login')
-  login(@Body(ValidationPipe) loginInputDto: LoginInputDto): Promise<LoginOutputDTO> {
+  login(@Body(ValidationPipe) loginInputDto: LoginInputDTO): Promise<LoginOutputDTO> {
     return this.accountService.login(loginInputDto);
   }
 

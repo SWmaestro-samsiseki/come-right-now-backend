@@ -1,5 +1,6 @@
 import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
@@ -9,6 +10,7 @@ import { StoreInfoDTO } from './dto/store-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
 
+@ApiTags('store')
 @Controller('store')
 export class StoreController {
   constructor(
