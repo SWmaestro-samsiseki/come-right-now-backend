@@ -1,11 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LoginInputDto, LoginOutputDTO } from './account.dto';
+import { LoginInputDto, LoginOutputDTO } from './dto/account.dto';
 import { Account } from './account.entity';
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './account.constants';
 
 @Injectable()
 export class AccountService {

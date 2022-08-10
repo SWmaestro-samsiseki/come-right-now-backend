@@ -1,13 +1,6 @@
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { ReservationStatus } from '../enum/reservation-status.enum';
 
 @Entity()
