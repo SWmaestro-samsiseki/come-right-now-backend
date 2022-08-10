@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
@@ -73,14 +73,12 @@ export class StoreService {
     return filteredStores;
   }
 
-  async getStoreById(storeId: string): Promise<StoreInfoDTO> {
+  // storeId에 해당하는 주점 객체 반환
+  async findStore(storeId: string): Promise<Store> {
     const store = await this.storeRepository.findOne({
       relations: ['businessHours'],
       where: {
         id: storeId,
-        businessHours: {
-          businessDay: this.dateUtilService.getDayOfWeekToday(),
-        },
       },
     });
 
@@ -88,6 +86,11 @@ export class StoreService {
       throw new NotFoundException('no store');
     }
 
+    return store;
+  }
+
+  async getStoreById(storeId: string): Promise<StoreInfoDTO> {
+    const store = await this.findStore(storeId);
     const {
       masterName,
       masterPhone,
@@ -108,6 +111,14 @@ export class StoreService {
       mainMenuImage,
     } = store;
 
+    const todayBusinessHours = businessHours.filter(
+      (bh) => bh.businessDay === this.dateUtilService.getDayOfWeekToday(),
+    )[0];
+    if (!todayBusinessHours) {
+      throw new BadRequestException('not opened store');
+    }
+
+    // FIXME: 애초에 DB에 null이 아닌 빈 문자열이 들어가도록 수정 (삼항 연산자 사용 X)
     const storeWithBusinessHour: StoreInfoDTO = {
       storeId,
       masterName,
@@ -116,19 +127,20 @@ export class StoreService {
       storeType,
       latitude,
       longitude,
-      introduce,
+      introduce: introduce ? introduce : '',
       starRate,
       address,
       storePhone,
       businessNumber,
-      openAt: businessHours[0].openAt,
-      closeAt: businessHours[0].closeAt,
+      openAt: todayBusinessHours.openAt,
+      closeAt: todayBusinessHours.closeAt,
       storeImage: storeImage ? storeImage : '',
       mainMenu1: mainMenu1 ? mainMenu1 : '',
       mainMenu2: mainMenu2 ? mainMenu2 : '',
       mainMenu3: mainMenu3 ? mainMenu3 : '',
       mainMenuImage: mainMenuImage ? mainMenuImage : '',
     };
+
     return storeWithBusinessHour;
   }
 }
