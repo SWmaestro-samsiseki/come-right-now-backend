@@ -1,9 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LoginInputDto, LoginOutputDTO } from './account.dto';
+import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { Account } from './account.entity';
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -13,7 +12,7 @@ export class AccountService {
     private jwtService: JwtService,
   ) {}
 
-  async login(loginInputDto: LoginInputDto): Promise<LoginOutputDTO> {
+  async login(loginInputDto: LoginInputDTO): Promise<LoginOutputDTO> {
     const { email, password } = loginInputDto;
     const account = await this.accountRepository.findOne({ where: { email } });
     // FIXME: 암호화

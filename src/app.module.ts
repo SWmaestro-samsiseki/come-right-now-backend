@@ -8,8 +8,6 @@ import { UserModule } from './user/user.module';
 import { StoreModule } from './store/store.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { CategoryModule } from './category/category.module';
-import { StoreTableModule } from './store-table/store-table.module';
-import { BusinessHourModule } from './business-hour/business-hour.module';
 import { AccountModule } from './account/account.module';
 import { ReservationEventsModule } from './reservation-events/reservation-events.module';
 import { DateUtilModule } from './date-util/date-util.module';
@@ -34,8 +32,6 @@ import { DateUtilModule } from './date-util/date-util.module';
     StoreModule,
     ReservationModule,
     CategoryModule,
-    StoreTableModule,
-    BusinessHourModule,
     AccountModule,
     ReservationEventsModule,
     DateUtilModule,
