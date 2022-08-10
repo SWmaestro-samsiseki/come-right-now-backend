@@ -73,7 +73,7 @@ export class StoreService {
     return filteredStores;
   }
 
-  // storeId에 해당하는 주점 객체 반환
+  // storeId에 해당하는 주점 검색 및 store 객체 반환
   async findStore(storeId: string): Promise<Store> {
     const store = await this.storeRepository.findOne({
       relations: ['businessHours'],
@@ -89,6 +89,7 @@ export class StoreService {
     return store;
   }
 
+  // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
   async getStoreById(storeId: string): Promise<StoreInfoDTO> {
     const store = await this.findStore(storeId);
     const {
