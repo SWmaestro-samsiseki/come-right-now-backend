@@ -91,7 +91,7 @@ export class StoreService {
   }
 
   // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
-  async getStoreById(storeId: string): Promise<StoreInfoDTO> {
+  async getStoreInfoById(storeId: string): Promise<StoreInfoDTO> {
     const store = await this.findStore(storeId);
     const {
       masterName,
