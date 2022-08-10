@@ -50,13 +50,6 @@ export class ReservationService {
     return reservations;
   }
 
-  // async responseSeat(reservationId: number): Promise<Reservation> {
-  //   return this.reservationRepository.save({
-  //     id: reservationId,
-  //     reservationStatus: ReservationStatus.PENDING,
-  //   });
-  // }
-
   async createReservation(createReservationDTO: createReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
