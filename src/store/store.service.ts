@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { StoreInfoDTO } from './dto/store-info.dto';
+import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 
 @Injectable()
@@ -143,5 +144,18 @@ export class StoreService {
     };
 
     return storeWithBusinessHour;
+  }
+
+  // 주점업자 본인이 조회할 수 있는 주점 정보 반환
+  // FIXME: email을 인자로 넘겨 받을 지 account 테이블에서 조회해올 지 결정
+  async getStoreMyInfo(storeId: string, email: string): Promise<StoreMyInfoDTO> {
+    const store = await this.findStore(storeId);
+
+    const storeMyInfoDTO: StoreMyInfoDTO = {
+      email,
+      ...store,
+    };
+
+    return storeMyInfoDTO;
   }
 }
