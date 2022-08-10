@@ -22,7 +22,7 @@ export class StoreController {
   ) {}
 
   @Get(':id/info')
-  async getStoreById(@Param('id') id: string): Promise<StoreInfoDTO> {
+  async getStoreInfoById(@Param('id') id: string): Promise<StoreInfoDTO> {
     const store = await this.storeService.getStoreInfoById(id);
 
     return store;
