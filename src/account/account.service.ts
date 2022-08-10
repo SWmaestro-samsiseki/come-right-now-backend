@@ -5,7 +5,6 @@ import { LoginInputDto, LoginOutputDTO } from './account.dto';
 import { Account } from './account.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './account.constants';
 
 @Injectable()
 export class AccountService {
