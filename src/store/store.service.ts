@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
-import { StoreInfoDTO } from './dto/store-info.dto';
+import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 
@@ -91,59 +91,45 @@ export class StoreService {
   }
 
   // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
-  async getStoreInfoById(storeId: string): Promise<StoreInfoDTO> {
-    const store = await this.findStore(storeId);
-    const {
-      masterName,
-      masterPhone,
-      businessName,
-      storeType,
-      latitude,
-      longitude,
-      introduce,
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-      businessHours,
-      storeImage,
-      mainMenu1,
-      mainMenu2,
-      mainMenu3,
-      menuImage,
-    } = store;
+  async getStoreByIdForPublic(storeId: string): Promise<StoreForPublicDTO> {
+    const store = await this.storeRepository.findOne({
+      select: [
+        'id',
+        'businessName',
+        'storeType',
+        'address',
+        'latitude',
+        'longitude',
+        'storePhone',
+        'introduce',
+        'storeImage',
+        'mainMenu1',
+        'mainMenu2',
+        'mainMenu3',
+        'menuImage',
+        'starRate',
+        'businessHours',
+      ],
+      relations: ['businessHours'],
+      where: {
+        id: storeId,
+      },
+    });
+    if (!store) {
+      throw new NotFoundException('no store');
+    }
 
+    const { businessHours } = store;
     const todayBusinessHours = businessHours.filter(
       (bh) => bh.businessDay === this.dateUtilService.getDayOfWeekToday(),
     )[0];
-    if (!todayBusinessHours) {
-      throw new BadRequestException('not opened store');
-    }
 
-    // FIXME: 애초에 DB에 null이 아닌 빈 문자열이 들어가도록 수정 (삼항 연산자 사용 X)
-    const storeWithBusinessHour: StoreInfoDTO = {
-      storeId,
-      masterName,
-      masterPhone,
-      businessName,
-      storeType,
-      latitude,
-      longitude,
-      introduce: introduce ? introduce : '',
-      starRate,
-      address,
-      storePhone,
-      businessNumber,
-      openAt: todayBusinessHours.openAt,
-      closeAt: todayBusinessHours.closeAt,
-      storeImage: storeImage ? storeImage : '',
-      mainMenu1: mainMenu1 ? mainMenu1 : '',
-      mainMenu2: mainMenu2 ? mainMenu2 : '',
-      mainMenu3: mainMenu3 ? mainMenu3 : '',
-      mainMenuImage: menuImage ? menuImage : '',
+    const storeForPublicDTO: StoreForPublicDTO = {
+      ...store,
+      todayOpenAt: todayBusinessHours ? todayBusinessHours.openAt : null,
+      todayCloseAt: todayBusinessHours ? todayBusinessHours.closeAt : null,
     };
-
-    return storeWithBusinessHour;
+    return storeForPublicDTO;
   }
 
   // 주점업자 본인이 조회할 수 있는 주점 정보 반환
