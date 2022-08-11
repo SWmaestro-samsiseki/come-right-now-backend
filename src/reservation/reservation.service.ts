@@ -2,10 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
+import { StoreForPublicDTO } from 'src/store/dto/store-for-public.dto';
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { CreateReservationDTO } from './dto/create-reservation.dto';
+import { ReservationDTO } from './dto/reservation.dto';
 import { Reservation } from './reservation.entity';
 
 @Injectable()
@@ -16,6 +18,32 @@ export class ReservationService {
     @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
     private readonly dateUtilService: DateUtilService,
   ) {}
+
+  private filterPrivateReservationData(reservation: Reservation): ReservationDTO {
+    const dayOfWeekToday = this.dateUtilService.getDayOfWeekToday();
+    const storeObj = Object(reservation.store);
+    delete storeObj.masterName;
+    delete storeObj.masterPhone;
+    delete storeObj.businessNumber;
+    storeObj.todayOpenAt = reservation.store.businessHours.find(
+      (b) => b.businessDay === dayOfWeekToday,
+    ).openAt;
+    storeObj.todayCloseAt = reservation.store.businessHours.find(
+      (b) => b.businessDay === dayOfWeekToday,
+    ).closeAt;
+
+    const result: ReservationDTO = {
+      id: reservation.id,
+      numberOfPeople: reservation.numberOfPeople,
+      estimatedTime: reservation.estimatedTime,
+      createdAt: reservation.createdAt,
+      reservationStatus: reservation.reservationStatus,
+      user: reservation.user,
+      store: storeObj as StoreForPublicDTO,
+    };
+
+    return result;
+  }
 
   async getReservationByUserId(status: string, userId: string) {
     const reservationStatus = ReservationStatus[status.toUpperCase()];
@@ -61,12 +89,16 @@ export class ReservationService {
       })
       .getOne();
 
-    console.log(reservation);
+    if (!reservation) {
+      throw new NotFoundException('no reservation');
+    }
 
-    return reservation;
+    const result: ReservationDTO = this.filterPrivateReservationData(reservation);
+
+    return result;
   }
 
-  async getStoreReservationByStatus(status: string, storeId: string) {
+  async getStoreReservationByStatus(status: string, storeId: string): Promise<ReservationDTO[]> {
     const reservationStatus = ReservationStatus[status.toUpperCase()];
 
     const reservations = await this.reservationRepository
@@ -109,7 +141,14 @@ export class ReservationService {
         status: reservationStatus,
       })
       .getMany();
-    return reservations;
+
+    const results = [];
+    for (const reservation of reservations) {
+      const result: ReservationDTO = this.filterPrivateReservationData(reservation);
+
+      results.push(result);
+    }
+    return results;
   }
 
   async createReservation(createReservationDTO: CreateReservationDTO): Promise<number> {
@@ -176,7 +215,14 @@ export class ReservationService {
       .leftJoin('s.businessHours', 'b')
       .where('r.id = :id', { id: reservationId })
       .getOne();
-    return reservation;
+
+    if (!reservation) {
+      throw new NotFoundException('no reservation');
+    }
+
+    const result = this.filterPrivateReservationData(reservation);
+
+    return result;
   }
 
   async updateReservationStatus(reservationId: number, status: string) {
