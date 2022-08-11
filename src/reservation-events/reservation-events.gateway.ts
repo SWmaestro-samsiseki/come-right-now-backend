@@ -14,7 +14,6 @@ import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 import { userFindStoreServerDTO } from './dto/user-find-store-server.dto';
 import { StoreService } from 'src/store/store.service';
 import { DateUtilService } from 'src/date-util/date-util.service';
-import { UserService } from 'src/user/user.service';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
@@ -32,7 +31,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly accountService: AccountService,
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
-    private readonly userService: UserService,
     private readonly reservationService: ReservationService,
   ) {}
 

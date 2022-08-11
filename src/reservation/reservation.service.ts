@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BusinessHour } from 'src/business-hour/business-hour.entity';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
@@ -15,7 +14,6 @@ export class ReservationService {
     @InjectRepository(Reservation) private readonly reservationRepository: Repository<Reservation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
-    @InjectRepository(BusinessHour)
     private readonly dateUtilService: DateUtilService,
   ) {}
 
@@ -178,7 +176,6 @@ export class ReservationService {
       .leftJoin('s.businessHours', 'b')
       .where('r.id = :id', { id: reservationId })
       .getOne();
-
     return reservation;
   }
 
