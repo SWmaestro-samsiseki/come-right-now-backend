@@ -110,7 +110,7 @@ export class StoreService {
       mainMenu1,
       mainMenu2,
       mainMenu3,
-      mainMenuImage,
+      menuImage,
     } = store;
 
     const todayBusinessHours = businessHours.filter(
@@ -140,7 +140,7 @@ export class StoreService {
       mainMenu1: mainMenu1 ? mainMenu1 : '',
       mainMenu2: mainMenu2 ? mainMenu2 : '',
       mainMenu3: mainMenu3 ? mainMenu3 : '',
-      mainMenuImage: mainMenuImage ? mainMenuImage : '',
+      menuImage: menuImage ? menuImage : '',
     };
 
     return storeWithBusinessHour;

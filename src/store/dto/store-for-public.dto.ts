@@ -1,18 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BusinessHour } from 'src/business-hour/business-hour.entity';
 
-export class StoreMyInfoDTO {
+export class StoreForPublicDTO {
   @ApiProperty()
   id: string;
-
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  masterName: string;
-
-  @ApiProperty()
-  storeName: string;
 
   @ApiProperty()
   businessName: string;
@@ -30,16 +21,10 @@ export class StoreMyInfoDTO {
   storePhone: string;
 
   @ApiProperty()
-  masterPhone: string;
-
-  @ApiProperty()
   introduce: string;
 
   @ApiProperty()
   storeImage: string;
-
-  @ApiProperty()
-  businessNumber: string;
 
   @ApiProperty()
   mainMenu1: string;
@@ -58,6 +43,12 @@ export class StoreMyInfoDTO {
 
   @ApiProperty()
   address: string;
+
+  @ApiProperty()
+  todayOpenAt: Date;
+
+  @ApiProperty()
+  todayCloseAt: Date;
 
   @ApiProperty()
   businessHours: BusinessHour[];
