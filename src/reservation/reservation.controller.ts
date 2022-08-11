@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { createReservationDTO } from './dto/create-reservation.dto';
+import { CreateReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 import { ReservationService } from './reservation.service';
 
@@ -30,13 +30,13 @@ export class ReservationController {
   }
 
   @Post()
-  async createReservations(@Body() createReservationDTOArray: createReservationDTO[]) {
+  async createReservations(@Body() createReservationDTOArray: CreateReservationDTO[]) {
     for (const createReservationDTO of createReservationDTOArray) {
       await this.reservationService.createReservation(createReservationDTO);
     }
   }
 
-  @Get(':reservationId')
+  @Get(':id')
   async getReservationById(@Param('reservationId', ParseIntPipe) id: number) {
     return await this.reservationService.getReservationById(id);
   }

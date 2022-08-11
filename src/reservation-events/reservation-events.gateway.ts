@@ -16,7 +16,7 @@ import { StoreService } from 'src/store/store.service';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { UserService } from 'src/user/user.service';
 import { ReservationService } from 'src/reservation/reservation.service';
-import { createReservationDTO } from 'src/reservation/dto/create-reservation.dto';
+import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 
 @WebSocketGateway({
@@ -109,7 +109,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           store.longitude,
           delayMinutes,
         );
-        const createReservationDTO: createReservationDTO = {
+        const createReservationDTO: CreateReservationDTO = {
           numberOfPeople,
           estimatedTime,
           userId,
