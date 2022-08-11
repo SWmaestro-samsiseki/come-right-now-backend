@@ -105,4 +105,6 @@ export class Store extends BaseEntity {
   @ManyToMany(() => Category, { createForeignKeyConstraints: false })
   @JoinTable({ name: 'store_category' })
   categories: Category[];
+
+  public account: Account;
 }
