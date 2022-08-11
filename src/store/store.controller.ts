@@ -30,11 +30,11 @@ export class StoreController {
 
   @Get('my-info')
   @UseGuards(AuthGuard())
-  async getStoreMyInfo(@getAccount() account): Promise<StoreMyInfoDTO> {
-    const { id, email } = account;
-    const storeInfo = await this.storeService.getStoreMyInfo(id, email);
+  async getStoreMyInfo(@getAccount() account): Promise<Store> {
+    const { id } = account;
+    const store = await this.storeService.getStoreById(id);
 
-    return storeInfo;
+    return store;
   }
 
   /////////// 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성
