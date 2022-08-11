@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
@@ -71,22 +71,6 @@ export class StoreService {
       throw new NotFoundException('no store in condition');
     }
     return filteredStores;
-  }
-
-  // storeId에 해당하는 주점 검색 및 store 객체 반환
-  async findStore(storeId: string): Promise<Store> {
-    const store = await this.storeRepository.findOne({
-      relations: ['businessHours'],
-      where: {
-        id: storeId,
-      },
-    });
-
-    if (!store) {
-      throw new NotFoundException('no store');
-    }
-
-    return store;
   }
 
   // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
