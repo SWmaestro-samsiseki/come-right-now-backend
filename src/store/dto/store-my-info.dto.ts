@@ -51,7 +51,7 @@ export class StoreMyInfoDTO {
   mainMenu3: string;
 
   @ApiProperty()
-  mainMenuImage: string;
+  menuImage: string;
 
   @ApiProperty()
   starRate: number;
