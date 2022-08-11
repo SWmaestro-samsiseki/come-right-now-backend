@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateReservationDTO } from './dto/create-reservation.dto';
-import { Reservation } from './reservation.entity';
+import { ReservationDTO } from './dto/reservation.dto';
 import { ReservationService } from './reservation.service';
 
 @ApiTags('reservation')
@@ -13,7 +12,7 @@ export class ReservationController {
   async getUserReserved(
     @Query('status') status: string,
     @Param('id') userId: string,
-  ): Promise<Reservation> {
+  ): Promise<ReservationDTO> {
     const reservation = await this.reservationService.getReservationByUserId(status, userId);
 
     return reservation;
@@ -23,21 +22,14 @@ export class ReservationController {
   async getStoreReservedAndPending(
     @Query('status') status: string,
     @Param('id') storeId: string,
-  ): Promise<Reservation[]> {
+  ): Promise<ReservationDTO[]> {
     const reservations = await this.reservationService.getStoreReservationByStatus(status, storeId);
 
     return reservations;
   }
 
-  @Post()
-  async createReservations(@Body() createReservationDTOArray: CreateReservationDTO[]) {
-    for (const createReservationDTO of createReservationDTOArray) {
-      await this.reservationService.createReservation(createReservationDTO);
-    }
-  }
-
-  @Get(':reservationId')
-  async getReservationById(@Param('reservationId', ParseIntPipe) id: number) {
+  @Get(':id/info')
+  async getReservationById(@Param('id', ParseIntPipe) id: number) {
     return await this.reservationService.getReservationById(id);
   }
 
