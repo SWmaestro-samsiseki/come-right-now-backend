@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { StoreInfoDTO } from './dto/store-info.dto';
+import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 
 @Injectable()
@@ -73,14 +74,12 @@ export class StoreService {
     return filteredStores;
   }
 
-  async getStoreById(storeId: string): Promise<StoreInfoDTO> {
+  // storeId에 해당하는 주점 검색 및 store 객체 반환
+  async findStore(storeId: string): Promise<Store> {
     const store = await this.storeRepository.findOne({
       relations: ['businessHours'],
       where: {
         id: storeId,
-        businessHours: {
-          businessDay: this.dateUtilService.getDayOfWeekToday(),
-        },
       },
     });
 
@@ -88,6 +87,12 @@ export class StoreService {
       throw new NotFoundException('no store');
     }
 
+    return store;
+  }
+
+  // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
+  async getStoreInfoById(storeId: string): Promise<StoreInfoDTO> {
+    const store = await this.findStore(storeId);
     const {
       masterName,
       masterPhone,
@@ -108,6 +113,14 @@ export class StoreService {
       mainMenuImage,
     } = store;
 
+    const todayBusinessHours = businessHours.filter(
+      (bh) => bh.businessDay === this.dateUtilService.getDayOfWeekToday(),
+    )[0];
+    if (!todayBusinessHours) {
+      throw new BadRequestException('not opened store');
+    }
+
+    // FIXME: 애초에 DB에 null이 아닌 빈 문자열이 들어가도록 수정 (삼항 연산자 사용 X)
     const storeWithBusinessHour: StoreInfoDTO = {
       storeId,
       masterName,
@@ -116,19 +129,33 @@ export class StoreService {
       storeType,
       latitude,
       longitude,
-      introduce,
+      introduce: introduce ? introduce : '',
       starRate,
       address,
       storePhone,
       businessNumber,
-      openAt: businessHours[0].openAt,
-      closeAt: businessHours[0].closeAt,
+      openAt: todayBusinessHours.openAt,
+      closeAt: todayBusinessHours.closeAt,
       storeImage: storeImage ? storeImage : '',
       mainMenu1: mainMenu1 ? mainMenu1 : '',
       mainMenu2: mainMenu2 ? mainMenu2 : '',
       mainMenu3: mainMenu3 ? mainMenu3 : '',
       mainMenuImage: mainMenuImage ? mainMenuImage : '',
     };
+
     return storeWithBusinessHour;
+  }
+
+  // 주점업자 본인이 조회할 수 있는 주점 정보 반환
+  // FIXME: email을 인자로 넘겨 받을 지 account 테이블에서 조회해올 지 결정
+  async getStoreMyInfo(storeId: string, email: string): Promise<StoreMyInfoDTO> {
+    const store = await this.findStore(storeId);
+
+    const storeMyInfoDTO: StoreMyInfoDTO = {
+      email,
+      ...store,
+    };
+
+    return storeMyInfoDTO;
   }
 }

@@ -7,6 +7,7 @@ import { getAccount } from 'src/account/get-account.decorator';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
 import { StoreInfoDTO } from './dto/store-info.dto';
+import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
 
@@ -21,17 +22,17 @@ export class StoreController {
   ) {}
 
   @Get(':id/info')
-  async getStoreById(@Param('id') id: string): Promise<StoreInfoDTO> {
-    const store = await this.storeService.getStoreById(id);
+  async getStoreInfoById(@Param('id') id: string): Promise<StoreInfoDTO> {
+    const store = await this.storeService.getStoreInfoById(id);
 
     return store;
   }
 
   @Get('my-info')
   @UseGuards(AuthGuard())
-  async getStoreInfo(@getAccount() account): Promise<StoreInfoDTO> {
-    const storeId = account.id;
-    const storeInfo = await this.storeService.getStoreById(storeId);
+  async getStoreMyInfo(@getAccount() account): Promise<StoreMyInfoDTO> {
+    const { id, email } = account;
+    const storeInfo = await this.storeService.getStoreMyInfo(id, email);
 
     return storeInfo;
   }

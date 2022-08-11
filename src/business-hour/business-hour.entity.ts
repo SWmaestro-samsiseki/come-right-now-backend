@@ -5,7 +5,7 @@ import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne } from 't
 
 @Entity()
 export class BusinessHour extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   @ApiProperty()
   public id: number;
 
