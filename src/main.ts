@@ -9,7 +9,6 @@ import { User } from './user/user.entity';
 import { Reservation } from './reservation/reservation.entity';
 import { StoreTable } from './store-table/store-table.entity';
 import { Store } from './store/store.entity';
-import { StoreInfoDTO } from './store/dto/store-info.dto';
 import { Category } from './category/category.entity';
 import { BusinessHour } from './business-hour/business-hour.entity';
 import { Account } from './account/account.entity';
@@ -44,7 +43,6 @@ async function initServer(port: number) {
       UserInfoDTO,
       StoreTable,
       Store,
-      StoreInfoDTO,
       Reservation,
       Category,
       BusinessHour,
