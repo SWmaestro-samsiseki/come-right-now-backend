@@ -140,7 +140,7 @@ export class StoreService {
       mainMenu1: mainMenu1 ? mainMenu1 : '',
       mainMenu2: mainMenu2 ? mainMenu2 : '',
       mainMenu3: mainMenu3 ? mainMenu3 : '',
-      menuImage: menuImage ? menuImage : '',
+      mainMenuImage: menuImage ? menuImage : '',
     };
 
     return storeWithBusinessHour;

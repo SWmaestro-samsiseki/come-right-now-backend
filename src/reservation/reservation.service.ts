@@ -1,11 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BusinessHour } from 'src/business-hour/business-hour.entity';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { Store } from 'src/store/store.entity';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
-import { createReservationDTO } from './dto/create-reservation.dto';
+import { CreateReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 
 @Injectable()
@@ -14,22 +15,55 @@ export class ReservationService {
     @InjectRepository(Reservation) private readonly reservationRepository: Repository<Reservation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Store) private readonly storeRepository: Repository<Store>,
+    @InjectRepository(BusinessHour)
     private readonly dateUtilService: DateUtilService,
   ) {}
 
   async getReservationByUserId(status: string, userId: string) {
-    if (status !== 'reserved') {
-      throw new BadRequestException();
-    }
-    const reservation = await this.reservationRepository.findOne({
-      relations: ['user', 'store'],
-      where: {
-        user: {
-          id: userId,
-        },
-        reservationStatus: ReservationStatus.RESERVED,
-      },
-    });
+    const reservationStatus = ReservationStatus[status.toUpperCase()];
+
+    const reservation = await this.reservationRepository
+      .createQueryBuilder('r')
+      .select([
+        'r.id',
+        'r.numberOfPeople',
+        'r.estimatedTime',
+        'r.createdAt',
+        'r.reservationStatus',
+        'u.id',
+        'u.name',
+        'u.phone',
+        'u.birthDate',
+        'u.creditRate',
+        's.id',
+        's.businessName',
+        's.storeType',
+        's.latitude',
+        's.longitude',
+        's.storePhone',
+        's.introduce',
+        's.storeImage',
+        's.mainMenu1',
+        's.mainMenu2',
+        's.mainMenu3',
+        's.menuImage',
+        's.starRate',
+        's.address',
+        'b.id',
+        'b.businessDay',
+        'b.openAt',
+        'b.closeAt',
+      ])
+      .leftJoin('r.store', 's')
+      .leftJoin('r.user', 'u')
+      .leftJoin('s.businessHours', 'b')
+      .where('u.id = :id AND r.reservationStatus = :status', {
+        status: reservationStatus,
+        id: userId,
+      })
+      .getOne();
+
+    console.log(reservation);
 
     return reservation;
   }
@@ -37,20 +71,50 @@ export class ReservationService {
   async getStoreReservationByStatus(status: string, storeId: string) {
     const reservationStatus = ReservationStatus[status.toUpperCase()];
 
-    const reservations = await this.reservationRepository.find({
-      relations: ['user', 'store'],
-      where: {
-        store: {
-          id: storeId,
-        },
-        reservationStatus,
-      },
-    });
-
+    const reservations = await this.reservationRepository
+      .createQueryBuilder('r')
+      .select([
+        'r.id',
+        'r.numberOfPeople',
+        'r.estimatedTime',
+        'r.createdAt',
+        'r.reservationStatus',
+        'u.id',
+        'u.name',
+        'u.phone',
+        'u.birthDate',
+        'u.creditRate',
+        's.id',
+        's.businessName',
+        's.storeType',
+        's.latitude',
+        's.longitude',
+        's.storePhone',
+        's.introduce',
+        's.storeImage',
+        's.mainMenu1',
+        's.mainMenu2',
+        's.mainMenu3',
+        's.menuImage',
+        's.starRate',
+        's.address',
+        'b.id',
+        'b.businessDay',
+        'b.openAt',
+        'b.closeAt',
+      ])
+      .leftJoin('r.store', 's')
+      .leftJoin('r.user', 'u')
+      .leftJoin('s.businessHours', 'b')
+      .where('s.id = :id AND r.reservationStatus = :status', {
+        id: storeId,
+        status: reservationStatus,
+      })
+      .getMany();
     return reservations;
   }
 
-  async createReservation(createReservationDTO: createReservationDTO): Promise<number> {
+  async createReservation(createReservationDTO: CreateReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
     const nowDate = this.dateUtilService.getNowDate();
@@ -76,17 +140,44 @@ export class ReservationService {
     return result.id;
   }
 
-  async getReservationById(id: number) {
-    const reservation = this.reservationRepository.findOne({
-      relations: ['store', 'user'],
-      where: {
-        id,
-      },
-    });
-
-    if (!reservation) {
-      throw new NotFoundException();
-    }
+  async getReservationById(reservationId: number) {
+    const reservation = await this.reservationRepository
+      .createQueryBuilder('r')
+      .select([
+        'r.id',
+        'r.numberOfPeople',
+        'r.estimatedTime',
+        'r.createdAt',
+        'r.reservationStatus',
+        'u.id',
+        'u.name',
+        'u.phone',
+        'u.birthDate',
+        'u.creditRate',
+        's.id',
+        's.businessName',
+        's.storeType',
+        's.latitude',
+        's.longitude',
+        's.storePhone',
+        's.introduce',
+        's.storeImage',
+        's.mainMenu1',
+        's.mainMenu2',
+        's.mainMenu3',
+        's.menuImage',
+        's.starRate',
+        's.address',
+        'b.id',
+        'b.businessDay',
+        'b.openAt',
+        'b.closeAt',
+      ])
+      .leftJoin('r.store', 's')
+      .leftJoin('r.user', 'u')
+      .leftJoin('s.businessHours', 'b')
+      .where('r.id = :id', { id: reservationId })
+      .getOne();
 
     return reservation;
   }

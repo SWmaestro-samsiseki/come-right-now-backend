@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Account } from 'src/account/account.entity';
 import { Reservation } from 'src/reservation/reservation.entity';
 import {

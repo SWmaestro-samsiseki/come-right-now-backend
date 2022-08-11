@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class createReservationDTO {
+export class CreateReservationDTO {
   @ApiProperty()
   numberOfPeople: number;
 
