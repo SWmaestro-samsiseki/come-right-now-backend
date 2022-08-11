@@ -134,14 +134,18 @@ export class StoreService {
 
   // 주점업자 본인이 조회할 수 있는 주점 정보 반환
   // FIXME: email을 인자로 넘겨 받을 지 account 테이블에서 조회해올 지 결정
-  async getStoreMyInfo(storeId: string, email: string): Promise<StoreMyInfoDTO> {
-    const store = await this.findStore(storeId);
+  async getStoreById(storeId: string): Promise<Store> {
+    const store = await this.storeRepository
+      .createQueryBuilder('store')
+      .innerJoinAndMapOne('store.account', 'store.id', 'account')
+      .select(['store', 'account.email'])
+      .where('store.id = :storeId', { storeId })
+      .getOne();
 
-    const storeMyInfoDTO: StoreMyInfoDTO = {
-      email,
-      ...store,
-    };
+    if (!store) {
+      throw new NotFoundException('no store');
+    }
 
-    return storeMyInfoDTO;
+    return store;
   }
 }
