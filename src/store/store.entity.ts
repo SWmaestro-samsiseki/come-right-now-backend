@@ -87,15 +87,11 @@ export class Store extends BaseEntity {
 
   @Column({ type: 'varchar', length: 250, nullable: true })
   @ApiProperty()
-  public mainMenuImage: string;
+  public menuImage: string;
 
   @Column({ type: 'decimal', precision: 1, scale: 1, nullable: false })
   @ApiProperty()
   public starRate: number;
-
-  @Column({ type: 'enum', enum: DayOfWeek, nullable: true })
-  @ApiProperty()
-  public offDays: DayOfWeek[];
 
   @OneToMany(() => BusinessHour, (businessHour) => businessHour.store)
   public businessHours: BusinessHour[];
