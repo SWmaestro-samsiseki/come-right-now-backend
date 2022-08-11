@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
-import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 
 @Injectable()

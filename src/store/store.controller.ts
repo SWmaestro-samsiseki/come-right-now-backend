@@ -7,7 +7,6 @@ import { getAccount } from 'src/account/get-account.decorator';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
-import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
 
