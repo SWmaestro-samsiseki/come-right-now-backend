@@ -36,7 +36,7 @@ export class ReservationController {
     }
   }
 
-  @Get(':id')
+  @Get(':reservationId')
   async getReservationById(@Param('reservationId', ParseIntPipe) id: number) {
     return await this.reservationService.getReservationById(id);
   }
