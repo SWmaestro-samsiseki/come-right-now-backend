@@ -17,6 +17,7 @@ import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
+import { WebsocketLogger } from 'src/logger/logger.service';
 
 @WebSocketGateway({
   cors: {
@@ -32,7 +33,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
     private readonly reservationService: ReservationService,
-  ) {}
+    private readonly websocketLogger: WebsocketLogger,
+  ) {
+    this.websocketLogger.setContext('reservation-events');
+  }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     const { uuid: id, userType } = socket.data;
@@ -45,12 +49,8 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         delete storeOnlineMap[id];
       }
     }
-    //TODO: 로그로 전환
-    console.log('***disconnected***');
-    console.log('<User Online>');
-    console.log(userOnlineMap);
-    console.log('Store Online>');
-    console.log(storeOnlineMap);
+
+    this.websocketLogger.websocketConnectionLog(false, socket.id, userType);
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
@@ -66,12 +66,8 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       uuid,
       userType,
     };
-    //TODO: 로그로 전환
-    console.log('***connected***');
-    console.log('<User Online>');
-    console.log(userOnlineMap);
-    console.log('<Store Online>');
-    console.log(storeOnlineMap);
+
+    this.websocketLogger.websocketConnectionLog(true, socket.id, userType);
   }
 
   @SubscribeMessage('user.find-store.server')
@@ -79,6 +75,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
   ) {
+    this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
     const userId = socket.data.uuid;
     const distance = 500;
     const {
@@ -115,8 +112,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);
         socket.to(storeSocketId).emit('server.find-store.store', reservationId);
+        this.websocketLogger.websocketEventLog('server.find-store.store', true, true);
       } catch (e) {
-        console.log(e);
+        this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+        this.websocketLogger.error(e);
         return false;
       }
     }
@@ -129,6 +128,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: { reservationId: number; userId: string },
   ) {
+    this.websocketLogger.websocketEventLog('store.accept-seat.server', false, true);
     const { userId, reservationId } = data;
     try {
       const reservation = await this.reservationService.getReservationById(reservationId);
@@ -143,11 +143,13 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       await this.reservationService.updateReservationStatus(reservationId, 'PENDING');
       const userSocketId = userOnlineMap[userId];
       socket.to(userSocketId).emit('server.available-seat.user', reservationId);
+      this.websocketLogger.websocketEventLog('store.accept-seat.server', true, true);
       return {
         isSuccess: true,
       };
     } catch (e) {
-      console.log(e);
+      this.websocketLogger.websocketEventLog('store.accept-seat.server', true, false);
+      this.websocketLogger.error(e);
       return {
         isSuccess: false,
         message: '만료된 요청입니다.',
@@ -160,8 +162,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: { storeId: string; reservationId: number },
   ): Promise<boolean> {
-    // 임시 로그
-    console.log('<<on>> make-reservation event listening..');
+    this.websocketLogger.websocketEventLog('user.make-reservation.server', false, true);
 
     const { storeId, reservationId } = data;
     try {
@@ -170,12 +171,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       const storeSocketId = storeOnlineMap[storeId];
       socket.to(storeSocketId).emit('server.make-reservation.store', reservationId);
 
-      // 임시 로그
-      console.log('<<emit>> make-reservation event from server to store');
+      this.websocketLogger.websocketEventLog('server.make-reservation.store', true, true);
+
       return true;
     } catch (e) {
-      // 임시 로그
-      console.log('<<error>>');
+      this.websocketLogger.websocketEventLog('server.make-reservation.store', true, false);
+      this.websocketLogger.error(e);
 
       return false;
     }

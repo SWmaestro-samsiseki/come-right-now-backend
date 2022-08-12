@@ -11,6 +11,7 @@ import { CategoryModule } from './category/category.module';
 import { AccountModule } from './account/account.module';
 import { ReservationEventsModule } from './reservation-events/reservation-events.module';
 import { DateUtilModule } from './date-util/date-util.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DateUtilModule } from './date-util/date-util.module';
     AccountModule,
     ReservationEventsModule,
     DateUtilModule,
+    LoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

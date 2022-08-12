@@ -6,6 +6,7 @@ import { StoreModule } from 'src/store/store.module';
 import { UserModule } from 'src/user/user.module';
 import { ReservationModule } from 'src/reservation/reservation.module';
 import { DateUtilModule } from 'src/date-util/date-util.module';
+import { LoggerModule } from 'src/logger/logger.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DateUtilModule } from 'src/date-util/date-util.module';
     ReservationModule,
     DateUtilModule,
     ReservationModule,
+    LoggerModule,
   ],
   providers: [ReservationEventsGateway],
   exports: [ReservationEventsGateway],
