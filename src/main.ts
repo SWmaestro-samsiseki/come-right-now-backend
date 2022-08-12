@@ -13,6 +13,7 @@ import { Category } from './category/category.entity';
 import { BusinessHour } from './business-hour/business-hour.entity';
 import { Account } from './account/account.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
+import { WebsocketLogger } from './logger/logger.service';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -26,9 +27,12 @@ async function bootstrap() {
  * @param {number} port 서버 바인딩 포트
  */
 async function initServer(port: number) {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
   app.enableCors();
   app.use(morgan('tiny'));
+  app.useLogger(new WebsocketLogger());
 
   const config = new DocumentBuilder()
     .setTitle('지금갈게 API Document')
