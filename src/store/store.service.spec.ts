@@ -76,7 +76,7 @@ describe('StoreService', () => {
     it('return store with id', async () => {
       const storeId = 'test';
 
-      const store = await storeService.getStoreById(storeId);
+      const store = await storeService.getStoreByIdForPublic(storeId);
 
       expect(store.id).toBe('test');
     });
@@ -85,7 +85,7 @@ describe('StoreService', () => {
       const storeId = 'wrongTest';
 
       try {
-        await storeService.getStoreById(storeId);
+        await storeService.getStoreByIdForPublic(storeId);
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
       }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,7 @@ import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
-import { StoreInfoDTO } from './dto/store-info.dto';
+import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
@@ -22,8 +22,8 @@ export class StoreController {
   ) {}
 
   @Get(':id/info')
-  async getStoreInfoById(@Param('id') id: string): Promise<StoreInfoDTO> {
-    const store = await this.storeService.getStoreInfoById(id);
+  async getStoreInfoById(@Param('id') id: string): Promise<StoreForPublicDTO> {
+    const store = await this.storeService.getStoreByIdForPublic(id);
 
     return store;
   }
