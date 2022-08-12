@@ -1,9 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
-import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 
 @Injectable()
@@ -74,22 +73,6 @@ export class StoreService {
     return filteredStores;
   }
 
-  // storeId에 해당하는 주점 검색 및 store 객체 반환
-  async findStore(storeId: string): Promise<Store> {
-    const store = await this.storeRepository.findOne({
-      relations: ['businessHours'],
-      where: {
-        id: storeId,
-      },
-    });
-
-    if (!store) {
-      throw new NotFoundException('no store');
-    }
-
-    return store;
-  }
-
   // 주점이용자가 storeId를 통해 검색한 주점의 정보 반환
   async getStoreByIdForPublic(storeId: string): Promise<StoreForPublicDTO> {
     const store = await this.storeRepository.findOne({
@@ -134,14 +117,18 @@ export class StoreService {
 
   // 주점업자 본인이 조회할 수 있는 주점 정보 반환
   // FIXME: email을 인자로 넘겨 받을 지 account 테이블에서 조회해올 지 결정
-  async getStoreMyInfo(storeId: string, email: string): Promise<StoreMyInfoDTO> {
-    const store = await this.findStore(storeId);
+  async getStoreById(storeId: string): Promise<Store> {
+    const store = await this.storeRepository
+      .createQueryBuilder('store')
+      .innerJoinAndMapOne('store.account', 'store.id', 'account')
+      .select(['store', 'account.email'])
+      .where('store.id = :storeId', { storeId })
+      .getOne();
 
-    const storeMyInfoDTO: StoreMyInfoDTO = {
-      email,
-      ...store,
-    };
+    if (!store) {
+      throw new NotFoundException('no store');
+    }
 
-    return storeMyInfoDTO;
+    return store;
   }
 }

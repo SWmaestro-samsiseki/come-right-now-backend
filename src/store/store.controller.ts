@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,7 +7,6 @@ import { getAccount } from 'src/account/get-account.decorator';
 import { Category } from 'src/category/category.entity';
 import { Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
-import { StoreMyInfoDTO } from './dto/store-my-info.dto';
 import { Store } from './store.entity';
 import { StoreService } from './store.service';
 
@@ -30,11 +29,11 @@ export class StoreController {
 
   @Get('my-info')
   @UseGuards(AuthGuard())
-  async getStoreMyInfo(@getAccount() account): Promise<StoreMyInfoDTO> {
-    const { id, email } = account;
-    const storeInfo = await this.storeService.getStoreMyInfo(id, email);
+  async getStoreMyInfo(@getAccount() account): Promise<Store> {
+    const { id } = account;
+    const store = await this.storeService.getStoreById(id);
 
-    return storeInfo;
+    return store;
   }
 
   /////////// 테스트 데이터 생성기 : localhost:3000/store/ 들어가면 생성

@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Account } from 'src/account/account.entity';
 import { BusinessHour } from 'src/business-hour/business-hour.entity';
 import { Category } from 'src/category/category.entity';
-import { DayOfWeek } from 'src/enum/days-of-week.enum';
 import { Reservation } from 'src/reservation/reservation.entity';
 import { StoreTable } from 'src/store-table/store-table.entity';
 import {
@@ -105,4 +104,6 @@ export class Store extends BaseEntity {
   @ManyToMany(() => Category, { createForeignKeyConstraints: false })
   @JoinTable({ name: 'store_category' })
   categories: Category[];
+
+  public account: Account;
 }
