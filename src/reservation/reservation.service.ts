@@ -25,12 +25,11 @@ export class ReservationService {
     delete storeObj.masterName;
     delete storeObj.masterPhone;
     delete storeObj.businessNumber;
-    storeObj.todayOpenAt = reservation.store.businessHours.find(
+    const todayBusinessHours = reservation.store.businessHours.find(
       (b) => b.businessDay === dayOfWeekToday,
-    ).openAt;
-    storeObj.todayCloseAt = reservation.store.businessHours.find(
-      (b) => b.businessDay === dayOfWeekToday,
-    ).closeAt;
+    );
+    storeObj.todayOpenAt = todayBusinessHours ? todayBusinessHours.openAt : null;
+    storeObj.todayCloseAt = todayBusinessHours ? todayBusinessHours.closeAt : null;
 
     const result: ReservationDTO = {
       id: reservation.id,
@@ -141,11 +140,9 @@ export class ReservationService {
         status: reservationStatus,
       })
       .getMany();
-
     const results = [];
     for (const reservation of reservations) {
       const result: ReservationDTO = this.filterPrivateReservationData(reservation);
-
       results.push(result);
     }
     return results;
