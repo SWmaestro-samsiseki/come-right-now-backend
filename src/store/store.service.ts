@@ -1,5 +1,7 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { firstValueFrom } from 'rxjs';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
@@ -10,6 +12,7 @@ export class StoreService {
   constructor(
     @InjectRepository(Store) private storeRepository: Repository<Store>,
     private readonly dateUtilService: DateUtilService,
+    private readonly httpService: HttpService,
   ) {}
 
   // 각도를 라디안으로 변환
@@ -130,5 +133,38 @@ export class StoreService {
     }
 
     return store;
+  }
+
+  async getDistanceMeterByTmap(
+    latitude1: number,
+    longitude1: number,
+    latitude2: number,
+    longitude2: number,
+  ) {
+    const ob = this.httpService.post(
+      'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function',
+      {
+        startX: longitude1,
+        startY: latitude1,
+        speed: 4,
+        endX: longitude2,
+        endY: latitude2,
+        startName: 'user',
+        endName: 'store',
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          appKey: process.env.TMAP_API_KEY,
+        },
+      },
+    );
+
+    const result = await firstValueFrom(ob);
+
+    const distance = result.data.features[0].properties.totalDistance as number;
+
+    return distance;
   }
 }
