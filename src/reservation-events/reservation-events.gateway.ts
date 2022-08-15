@@ -181,4 +181,48 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       return false;
     }
   }
+
+  @SubscribeMessage('store.cancel-reservation.server')
+  async cancelReservationStore(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() reservationId: number,
+  ) {
+    const reservation = await this.reservationService.getReservationById(reservationId);
+    const userId = reservation.user.id;
+    if (!(userId in userOnlineMap)) {
+      return {
+        isSuccess: false,
+      };
+    }
+    const userSocketId = userOnlineMap[userId];
+
+    socket.to(userSocketId).emit('server.cancel-reservation.user', reservationId);
+
+    return {
+      reservationId,
+      isSuccess: true,
+    };
+  }
+
+  @SubscribeMessage('user.cancel-reservation.server')
+  async cancelReservationUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() reservationId: number,
+  ) {
+    const reservation = await this.reservationService.getReservationById(reservationId);
+    const storeId = reservation.store.id;
+    if (!(storeId in storeOnlineMap)) {
+      return {
+        isSuccess: false,
+      };
+    }
+    const storeSocketId = storeOnlineMap[storeId];
+
+    socket.to(storeSocketId).emit('server.cancel-reservation.store', reservationId);
+
+    return {
+      reservationId,
+      isSuccess: true,
+    };
+  }
 }
