@@ -187,17 +187,25 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() reservationId: number,
   ) {
+    this.websocketLogger.websocketEventLog('store.cancel-reservation.server', false, true);
     const reservation = await this.reservationService.getReservationById(reservationId);
     const userId = reservation.user.id;
     if (!(userId in userOnlineMap)) {
       return {
-        isSuccess: false,
+        reservationId,
+        isSuccess: true,
       };
     }
     const userSocketId = userOnlineMap[userId];
 
-    socket.to(userSocketId).emit('server.cancel-reservation.user', reservationId);
+    try {
+      socket.to(userSocketId).emit('server.cancel-reservation.user', reservationId);
 
+      this.websocketLogger.websocketEventLog('server.cancel-reservation.user', true, true);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.cancel-reservation.user', true, false);
+      this.websocketLogger.error(e);
+    }
     return {
       reservationId,
       isSuccess: true,
@@ -209,17 +217,25 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() reservationId: number,
   ) {
+    this.websocketLogger.websocketEventLog('user.cancel-reservation.server', false, true);
     const reservation = await this.reservationService.getReservationById(reservationId);
     const storeId = reservation.store.id;
     if (!(storeId in storeOnlineMap)) {
       return {
-        isSuccess: false,
+        reservationId,
+        isSuccess: true,
       };
     }
     const storeSocketId = storeOnlineMap[storeId];
 
-    socket.to(storeSocketId).emit('server.cancel-reservation.store', reservationId);
+    try {
+      socket.to(storeSocketId).emit('server.cancel-reservation.store', reservationId);
 
+      this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, true);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
+      this.websocketLogger.error(e);
+    }
     return {
       reservationId,
       isSuccess: true,
