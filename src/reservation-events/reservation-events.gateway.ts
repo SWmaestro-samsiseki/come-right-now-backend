@@ -85,7 +85,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       longitude,
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
-
     // 1. 주점 검색
     const stores = await this.storeService.findCandidateStores(
       longitude,
@@ -93,10 +92,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       categories,
       distance,
     );
+
     // 2. 주점으로 이벤트 전송
     for (const store of stores) {
       try {
-        const storeSocketId = storeOnlineMap[store.id];
         const estimatedTime = await this.dateUtilService.getEstimatedTime(
           latitude,
           longitude,
@@ -111,6 +110,8 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           storeId: store.id,
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);
+
+        const storeSocketId = storeOnlineMap[store.id];
         socket.to(storeSocketId).emit('server.find-store.store', reservationId);
         this.websocketLogger.websocketEventLog('server.find-store.store', true, true);
       } catch (e) {
@@ -129,10 +130,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @MessageBody() data: { reservationId: number; userId: string },
   ) {
     this.websocketLogger.websocketEventLog('store.accept-seat.server', false, true);
-    const { userId, reservationId } = data;
     try {
+      const { userId, reservationId } = data;
       const reservation = await this.reservationService.getReservationById(reservationId);
-      // TODO: createAt 칼럼 생성 후 응답 시간 만료 2차 확인
+
       const { reservationStatus } = reservation;
       if (reservationStatus !== ReservationStatus.REQUESTED) {
         return {
@@ -140,7 +141,9 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           message: '이미 처리된 요청입니다.',
         };
       }
+
       await this.reservationService.updateReservationStatus(reservationId, 'PENDING');
+
       const userSocketId = userOnlineMap[userId];
       socket.to(userSocketId).emit('server.available-seat.user', reservationId);
       this.websocketLogger.websocketEventLog('store.accept-seat.server', true, true);
@@ -163,14 +166,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @MessageBody() data: { storeId: string; reservationId: number },
   ): Promise<boolean> {
     this.websocketLogger.websocketEventLog('user.make-reservation.server', false, true);
-
     const { storeId, reservationId } = data;
     try {
-      // TODO: reservationStatus가 '대기'가 아닐 때 에러처리 (이미 처리됨 or bad request)
       await this.reservationService.updateReservationStatus(reservationId, 'RESERVED');
+
       const storeSocketId = storeOnlineMap[storeId];
       socket.to(storeSocketId).emit('server.make-reservation.store', reservationId);
-
       this.websocketLogger.websocketEventLog('server.make-reservation.store', true, true);
 
       return true;
@@ -179,6 +180,50 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       this.websocketLogger.error(e);
 
       return false;
+    }
+  }
+
+  @SubscribeMessage('user.delay-reservation.server')
+  async delayReservarionEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() reservationId: number,
+  ) {
+    this.websocketLogger.websocketEventLog('user.delay-reservation.server', false, true);
+    // FIXME: 상수 관리
+    const MAX_DELAY_COUNT = 2;
+    const DELAY_MINUTE = 5;
+    const reservation = await this.reservationService.getReservationById(reservationId);
+    const { estimatedTime, delayCount, store } = reservation;
+    if (delayCount < MAX_DELAY_COUNT) {
+      const delayedTime = this.dateUtilService.addMinute([DELAY_MINUTE], estimatedTime);
+      const delayedCount = delayCount + 1;
+      await this.reservationService.updateEstimatedTimeForDelay(
+        reservationId,
+        delayedTime,
+        delayedCount,
+      );
+
+      try {
+        const storeSocketId = storeOnlineMap[store.id];
+        socket
+          .to(storeSocketId)
+          .emit('server.delay-reservation.store', { reservationId, estimatedTime: delayedTime });
+        this.websocketLogger.websocketEventLog('server.delay-reservation.store', true, true);
+      } catch (e) {
+        this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
+        this.websocketLogger.error(e);
+      }
+
+      return {
+        isSuccess: true,
+        count: delayedCount,
+        estimatedTime: delayedTime,
+      };
+    } else {
+      return {
+        isSuccess: false,
+        count: MAX_DELAY_COUNT,
+      };
     }
   }
 

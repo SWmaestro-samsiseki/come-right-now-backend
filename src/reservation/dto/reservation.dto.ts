@@ -13,6 +13,8 @@ export class ReservationDTO {
 
   reservationStatus: ReservationStatus;
 
+  delayCount: number;
+
   user: User;
 
   store: StoreForPublicDTO;
