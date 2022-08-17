@@ -30,6 +30,10 @@ export class Reservation extends BaseEntity {
   @ApiProperty()
   public reservedTable: string;
 
+  @Column({ type: 'int', default: 0 })
+  @ApiProperty()
+  public delayCount: number;
+
   @ManyToOne(() => User, (user) => user.reservations, {
     createForeignKeyConstraints: false,
   })
