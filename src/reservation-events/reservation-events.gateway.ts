@@ -188,6 +188,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     @ConnectedSocket() socket: Socket,
     @MessageBody() reservationId: number,
   ) {
+    this.websocketLogger.websocketEventLog('user.delay-reservation.server', false, true);
     // FIXME: 상수 관리
     const MAX_DELAY_COUNT = 2;
     const DELAY_MINUTE = 5;
@@ -202,10 +203,16 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         delayedCount,
       );
 
-      const storeSocketId = storeOnlineMap[store.id];
-      socket
-        .to(storeSocketId)
-        .emit('server.delay-reservation.store', { reservationId, estimatedTime: delayedTime });
+      try {
+        const storeSocketId = storeOnlineMap[store.id];
+        socket
+          .to(storeSocketId)
+          .emit('server.delay-reservation.store', { reservationId, estimatedTime: delayedTime });
+        this.websocketLogger.websocketEventLog('server.delay-reservation.store', true, true);
+      } catch (e) {
+        this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
+        this.websocketLogger.error(e);
+      }
 
       return {
         isSuccess: true,
