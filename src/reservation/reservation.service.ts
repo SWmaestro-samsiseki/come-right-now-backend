@@ -255,4 +255,17 @@ export class ReservationService {
       throw new NotFoundException();
     }
   }
+
+  async updateArrivalForCheckIn(reservationId: number) {
+    const nowDate = this.dateUtilService.getNowDate();
+    const reservationStatus = ReservationStatus.ARRIVED;
+    const result = await this.reservationRepository.update(reservationId, {
+      arrivalTime: nowDate,
+      reservationStatus,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+  }
 }

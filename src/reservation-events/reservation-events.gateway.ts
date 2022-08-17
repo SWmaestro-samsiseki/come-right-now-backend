@@ -219,6 +219,33 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       };
     }
   }
+
+  @SubscribeMessage('store.check-in.server')
+  async checkInEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: { reservationId: number; userId: string },
+  ): Promise<boolean> {
+    this.websocketLogger.websocketEventLog('store.check-in.server', false, true);
+    const { reservationId, userId } = data;
+
+    try {
+      await this.reservationService.updateArrivalForCheckIn(reservationId);
+    } catch (e) {
+      return false;
+    }
+
+    try {
+      const userSocketId = userOnlineMap[userId];
+      socket.to(userSocketId).emit('server.check-in.user', reservationId);
+      this.websocketLogger.websocketEventLog('server.check-in.user', true, true);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.check-in.user', true, false);
+      this.websocketLogger.error(e);
+    }
+
+    return true;
+  }
+
   @SubscribeMessage('store.cancel-reservation.server')
   async cancelReservationStore(
     @ConnectedSocket() socket: Socket,
