@@ -37,6 +37,7 @@ export class ReservationService {
       estimatedTime: reservation.estimatedTime,
       createdAt: reservation.createdAt,
       reservationStatus: reservation.reservationStatus,
+      delayCount: reservation.delayCount,
       user: reservation.user,
       store: storeObj as StoreForPublicDTO,
     };
@@ -183,6 +184,7 @@ export class ReservationService {
         'r.estimatedTime',
         'r.createdAt',
         'r.reservationStatus',
+        'r.delayCount',
         'u.id',
         'u.name',
         'u.phone',
@@ -233,6 +235,21 @@ export class ReservationService {
 
   async deleteReservation(reservationId: number) {
     const result = await this.reservationRepository.delete({ id: reservationId });
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+  }
+
+  async updateEstimatedTimeForDelay(
+    reservationId: number,
+    estimatedTime: Date,
+    delayCount: number,
+  ) {
+    const result = await this.reservationRepository.update(reservationId, {
+      estimatedTime,
+      delayCount,
+    });
 
     if (result.affected === 0) {
       throw new NotFoundException();
