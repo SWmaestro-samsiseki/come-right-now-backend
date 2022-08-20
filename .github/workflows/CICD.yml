@@ -1,0 +1,80 @@
+name: come right now CICD
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [16.15.1]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependency
+        run: npm ci
+
+      - name: Unit Test
+        run: npm test
+
+  buildAndDeploy:
+    needs: [test]
+
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [16.15.1]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm ci
+
+      - name: create env file
+        working-directory: ./
+        run: |
+          touch .production.env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> .production.env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .production.env
+          echo PORT=80 >> .production.env
+          cat .production.env
+      - name: build server files
+        working-directory: ./
+        run: npm run build
+
+      - name: aws 세팅
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: zip file
+        run: zip -r $GITHUB_SHA.zip ./dist ./deploy.sh ./appspec.yml ./.production.env ./package.json ./public ./views
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://junho-cicd-s3/$GITHUB_SHA.zip
+
+      - name: deploy with AWS codeDeploy
+        run: aws deploy create-deployment
+          --application-name junho-websocket-nest
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name junho-deploy-group
+          --s3-location bucket=junho-cicd-s3,bundleType=zip,key=$GITHUB_SHA.zip
