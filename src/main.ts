@@ -55,7 +55,7 @@ async function initServer(port: number) {
   SwaggerModule.setup('api', app, document);
 
   // #3. 바인딩
-  await app.listen(port, () => Logger.log(`Server started on port ${process.env.SERVER_PORT}`));
+  await app.listen(port, () => Logger.log(`Server started on port ${process.env.SERVER_PORT}!`));
 }
 
 bootstrap();
