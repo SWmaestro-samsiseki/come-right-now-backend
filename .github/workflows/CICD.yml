@@ -50,11 +50,17 @@ jobs:
       - name: create env file
         working-directory: ./
         run: |
-          touch .production.env
-          echo DB_HOST=${{ secrets.DB_HOST }} >> .production.env
-          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .production.env
-          echo PORT=80 >> .production.env
-          cat .production.env
+          touch .development.env
+          echo SERVER_PORT=${{ secrets.SERVER_PORT }} >> .development.env
+          echo TYPEORM_HOST=${{ secrets.TYPEORM_HOST }} >> .development.env
+          echo TYPEORM_PORT=${{ secrets.TYPEORM_PORT }} >> .development.env
+          echo TYPEORM_USERNAME=${{ secrets.TYPEORM_USERNAME }} >> .development.env
+          echo TYPEORM_PASSWORD=${{ secrets.TYPEORM_PASSWORD }} >> .development.env
+          echo TYPEORM_DATABASE=${{ secrets.TYPEORM_DATABASE }} >> .development.env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .development.env
+          echo TMAP_API_KEY=${{ secrets.TMAP_API_KEY }} >> .development.env
+          echo TZ=${{ secrets.TZ }} >> .development.env
+          cat .development.env
       - name: build server files
         working-directory: ./
         run: npm run build
@@ -67,14 +73,14 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: zip file
-        run: zip -r $GITHUB_SHA.zip ./dist ./deploy.sh ./appspec.yml ./.production.env ./package.json ./public ./views
+        run: zip -r $GITHUB_SHA.zip ./dist ./deploy.sh ./appspec.yml ./.development.env ./package.json
 
       - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://junho-cicd-s3/$GITHUB_SHA.zip
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://<bucketname>/$GITHUB_SHA.zip
 
       - name: deploy with AWS codeDeploy
         run: aws deploy create-deployment
-          --application-name junho-websocket-nest
+          --application-name <appname>
           --deployment-config-name CodeDeployDefault.OneAtATime
-          --deployment-group-name junho-deploy-group
+          --deployment-group-name <groupname>
           --s3-location bucket=junho-cicd-s3,bundleType=zip,key=$GITHUB_SHA.zip
