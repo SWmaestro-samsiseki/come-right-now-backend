@@ -83,4 +83,4 @@ jobs:
           --application-name jigeumgo-prod-codedeploy
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name jigeumgo-prod-deploygroup
-          --s3-location bucket=junho-cicd-s3,bundleType=zip,key=$GITHUB_SHA.zip
+          --s3-location bucket=jigeumgo-prod-s3,bundleType=zip,key=$GITHUB_SHA.zip
