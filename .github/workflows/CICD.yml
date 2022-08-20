@@ -76,11 +76,11 @@ jobs:
         run: zip -r $GITHUB_SHA.zip ./dist ./deploy.sh ./appspec.yml ./.development.env ./package.json
 
       - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://<bucketname>/$GITHUB_SHA.zip
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://jigeumgo-prod-s3/$GITHUB_SHA.zip
 
       - name: deploy with AWS codeDeploy
         run: aws deploy create-deployment
-          --application-name <appname>
+          --application-name jigeumgo-prod-codedeploy
           --deployment-config-name CodeDeployDefault.OneAtATime
-          --deployment-group-name <groupname>
+          --deployment-group-name jigeumgo-prod-deploygroup
           --s3-location bucket=junho-cicd-s3,bundleType=zip,key=$GITHUB_SHA.zip
