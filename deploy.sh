@@ -5,4 +5,4 @@ cd $REPOSITORY
 
 sudo npm i
 sudo pm2 kill
-sudo NODE_ENV=development pm2 start /dist/main.js
+sudo npm run start:dev-cicd
