@@ -5,4 +5,4 @@ cd $REPOSITORY
 
 sudo npm i
 sudo pm2 kill
-sudo npm run start:dev
+sudo NODE_ENV=development pm2 start /dist/main.js
