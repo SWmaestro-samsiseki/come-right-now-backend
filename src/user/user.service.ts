@@ -35,6 +35,10 @@ export class UserService {
       .where('user.id = :userId', { userId })
       .getOne();
 
+    if (!userInfo) {
+      throw new NotFoundException('no user');
+    }
+
     const { id, name, phone, birthDate, creditRate, account } = userInfo;
     const userInfoData: UserInfoDTO = {
       id,
