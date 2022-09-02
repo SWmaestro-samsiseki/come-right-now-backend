@@ -233,12 +233,14 @@ export class ReservationService {
     }
   }
 
-  async deleteReservation(reservationId: number) {
+  async deleteReservation(reservationId: number): Promise<boolean> {
     const result = await this.reservationRepository.delete({ id: reservationId });
 
     if (result.affected === 0) {
-      throw new NotFoundException();
+      throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
+
+    return true;
   }
 
   async updateEstimatedTimeForDelay(

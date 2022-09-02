@@ -35,11 +35,6 @@ export class ReservationController {
 
   @Delete(':id')
   async deleteReservation(@Param('id') reservationId: number): Promise<boolean> {
-    try {
-      await this.reservationService.deleteReservation(reservationId);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return await this.reservationService.deleteReservation(reservationId);
   }
 }
