@@ -233,11 +233,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketEventLog('store.check-in.server', false, true);
     const { reservationId, userId } = data;
 
-    try {
-      await this.reservationService.updateArrivalForCheckIn(reservationId);
-    } catch (e) {
-      return false;
-    }
+    await this.reservationService.updateArrivalForCheckIn(reservationId);
 
     try {
       const userSocketId = userOnlineMap[userId];
