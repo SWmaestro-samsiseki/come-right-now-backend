@@ -254,7 +254,7 @@ export class ReservationService {
     });
 
     if (result.affected === 0) {
-      throw new NotFoundException();
+      throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
   }
 
