@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
@@ -29,12 +29,7 @@ export class AccountService {
         userType: account.userType,
       };
     } else {
-      return {
-        isSuccess: false,
-        message: '로그인에 실패했습니다.',
-        accessToken: '',
-        userType: '',
-      };
+      throw new UnauthorizedException('아이디 또는 비밀번호가 일치하지 않습니다.');
     }
   }
 
