@@ -18,6 +18,7 @@ import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
+import { ForbiddenException } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -221,10 +222,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         estimatedTime: delayedTime,
       };
     } else {
-      return {
-        isSuccess: false,
-        count: MAX_DELAY_COUNT,
-      };
+      throw new ForbiddenException(`시간 변경 가능 횟수 ${MAX_DELAY_COUNT}회를 모두 소진했습니다.`);
     }
   }
 
@@ -236,11 +234,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketEventLog('store.check-in.server', false, true);
     const { reservationId, userId } = data;
 
-    try {
-      await this.reservationService.updateArrivalForCheckIn(reservationId);
-    } catch (e) {
-      return false;
-    }
+    await this.reservationService.updateArrivalForCheckIn(reservationId);
 
     try {
       const userSocketId = userOnlineMap[userId];

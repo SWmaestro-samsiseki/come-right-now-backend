@@ -235,12 +235,16 @@ export class ReservationService {
     }
   }
 
-  async deleteReservation(reservationId: number) {
+  // FIXME: Exception error 중복 코드 해결
+
+  async deleteReservation(reservationId: number): Promise<boolean> {
     const result = await this.reservationRepository.delete({ id: reservationId });
 
     if (result.affected === 0) {
-      throw new NotFoundException();
+      throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
+
+    return true;
   }
 
   async updateEstimatedTimeForDelay(
@@ -254,7 +258,7 @@ export class ReservationService {
     });
 
     if (result.affected === 0) {
-      throw new NotFoundException();
+      throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
   }
 
@@ -267,7 +271,7 @@ export class ReservationService {
     });
 
     if (result.affected === 0) {
-      throw new NotFoundException();
+      throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
   }
 }
