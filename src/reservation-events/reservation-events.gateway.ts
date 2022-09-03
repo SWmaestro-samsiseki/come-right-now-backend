@@ -107,6 +107,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           numberOfPeople,
           estimatedTime,
           userId,
+          delayMinutes,
           storeId: store.id,
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);

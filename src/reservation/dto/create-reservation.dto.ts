@@ -12,4 +12,7 @@ export class CreateReservationDTO {
 
   @ApiProperty()
   userId: string;
+
+  @ApiProperty()
+  delayMinutes: number;
 }

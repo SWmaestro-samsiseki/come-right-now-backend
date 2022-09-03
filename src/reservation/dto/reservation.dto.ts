@@ -18,4 +18,6 @@ export class ReservationDTO {
   user: User;
 
   store: StoreForPublicDTO;
+
+  departureTime: Date;
 }
