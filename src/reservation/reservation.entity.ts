@@ -44,7 +44,11 @@ export class Reservation extends BaseEntity {
   })
   store: Store;
 
-  @Column()
+  @Column({ type: 'datetime', nullable: false })
   @ApiProperty()
   createdAt: Date;
+
+  @Column({ type: 'int', default: 0 })
+  @ApiProperty()
+  delayMinutes: number;
 }

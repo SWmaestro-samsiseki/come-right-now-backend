@@ -30,16 +30,19 @@ export class ReservationService {
     );
     storeObj.todayOpenAt = todayBusinessHours ? todayBusinessHours.openAt : null;
     storeObj.todayCloseAt = todayBusinessHours ? todayBusinessHours.closeAt : null;
-
     const result: ReservationDTO = {
       id: reservation.id,
       numberOfPeople: reservation.numberOfPeople,
       estimatedTime: reservation.estimatedTime,
-      createdAt: reservation.createdAt,
+      createdAt: this.dateUtilService.parseDate(String(reservation.createdAt)),
       reservationStatus: reservation.reservationStatus,
       delayCount: reservation.delayCount,
       user: reservation.user,
       store: storeObj as StoreForPublicDTO,
+      departureTime: this.dateUtilService.addMinute(
+        [reservation.delayMinutes],
+        reservation.createdAt,
+      ),
     };
 
     return result;
@@ -94,7 +97,6 @@ export class ReservationService {
     }
 
     const result: ReservationDTO = this.filterPrivateReservationData(reservation);
-
     return result;
   }
 
@@ -151,13 +153,14 @@ export class ReservationService {
 
   async createReservation(createReservationDTO: CreateReservationDTO): Promise<number> {
     const reservation = this.reservationRepository.create();
-    const { numberOfPeople, storeId, estimatedTime, userId } = createReservationDTO;
+    const { numberOfPeople, storeId, estimatedTime, userId, delayMinutes } = createReservationDTO;
     const nowDate = this.dateUtilService.getNowDate();
 
     reservation.reservationStatus = ReservationStatus.REQUESTED;
     reservation.numberOfPeople = numberOfPeople;
     reservation.estimatedTime = estimatedTime;
     reservation.createdAt = nowDate;
+    reservation.delayMinutes = delayMinutes;
 
     const store = await this.storeRepository.findOne({
       where: {
@@ -220,7 +223,6 @@ export class ReservationService {
     }
 
     const result = this.filterPrivateReservationData(reservation);
-
     return result;
   }
 

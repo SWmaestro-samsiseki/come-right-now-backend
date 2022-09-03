@@ -7,6 +7,10 @@ import { DayOfWeek } from 'src/enum/days-of-week.enum';
 export class DateUtilService {
   constructor(private readonly httpService: HttpService) {}
 
+  parseDate(target: string): Date {
+    return new Date(target);
+  }
+
   dayOfWeeks = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   getDayOfWeekToday(): DayOfWeek {
@@ -22,7 +26,9 @@ export class DateUtilService {
 
   addMinute(minuteArray: number[], date: Date) {
     for (const minute of minuteArray) {
-      date.setMinutes(date.getMinutes() + minute);
+      if (minute >= 1) {
+        date.setMinutes(date.getMinutes() + minute);
+      }
     }
 
     return date;
