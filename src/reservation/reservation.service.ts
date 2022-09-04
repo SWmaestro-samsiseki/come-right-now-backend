@@ -45,6 +45,8 @@ export class ReservationService {
       ),
     };
 
+    console.log(result.departureTime, reservation.delayMinutes);
+
     return result;
   }
 
@@ -59,6 +61,7 @@ export class ReservationService {
         'r.estimatedTime',
         'r.createdAt',
         'r.reservationStatus',
+        'r.delayMinutes',
         'u.id',
         'u.name',
         'u.phone',
