@@ -18,7 +18,6 @@ import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
-import { ForbiddenException } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -194,35 +193,35 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     // FIXME: 상수 관리
     const MAX_DELAY_COUNT = 2;
     const DELAY_MINUTE = 5;
-    const reservation = await this.reservationService.getReservationById(reservationId);
-    const { estimatedTime, delayCount, store } = reservation;
-    if (delayCount < MAX_DELAY_COUNT) {
-      const delayedTime = this.dateUtilService.addMinute([DELAY_MINUTE], estimatedTime);
-      const delayedCount = delayCount + 1;
-      await this.reservationService.updateEstimatedTimeForDelay(
-        reservationId,
-        delayedTime,
-        delayedCount,
-      );
-
-      try {
+    try {
+      const reservation = await this.reservationService.getReservationById(reservationId);
+      const { estimatedTime, delayCount, store } = reservation;
+      if (delayCount < MAX_DELAY_COUNT) {
+        const delayedTime = this.dateUtilService.addMinute([DELAY_MINUTE], estimatedTime);
+        const delayedCount = delayCount + 1;
+        await this.reservationService.updateEstimatedTimeForDelay(
+          reservationId,
+          delayedTime,
+          delayedCount,
+        );
         const storeSocketId = storeOnlineMap[store.id];
         socket
           .to(storeSocketId)
           .emit('server.delay-reservation.store', { reservationId, estimatedTime: delayedTime });
         this.websocketLogger.websocketEventLog('server.delay-reservation.store', true, true);
-      } catch (e) {
-        this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
-        this.websocketLogger.error(e);
-      }
 
-      return {
-        isSuccess: true,
-        count: delayedCount,
-        estimatedTime: delayedTime,
-      };
-    } else {
-      throw new ForbiddenException(`시간 변경 가능 횟수 ${MAX_DELAY_COUNT}회를 모두 소진했습니다.`);
+        return {
+          isSuccess: true,
+          count: delayedCount,
+          estimatedTime: delayedTime,
+        };
+      } else {
+        return { isSuccess: false, count: MAX_DELAY_COUNT };
+      }
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
+      this.websocketLogger.error(e);
+      return { isSuccess: false };
     }
   }
 
