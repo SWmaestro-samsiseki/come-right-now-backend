@@ -219,7 +219,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         return { isSuccess: false, count: MAX_DELAY_COUNT };
       }
     } catch (e) {
-      this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
+      this.websocketLogger.websocketEventLog('server.delay-reservation.store', true, false);
       this.websocketLogger.error(e);
       return { isSuccess: false };
     }
@@ -271,6 +271,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     } catch (e) {
       this.websocketLogger.websocketEventLog('server.cancel-reservation.user', true, false);
       this.websocketLogger.error(e);
+
+      return {
+        isSuccess: false,
+      };
     }
     return {
       reservationId,
@@ -301,6 +305,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     } catch (e) {
       this.websocketLogger.websocketEventLog('server.cancel-reservation.store', true, false);
       this.websocketLogger.error(e);
+
+      return {
+        isSuccess: false,
+      };
     }
     return {
       reservationId,
