@@ -47,7 +47,8 @@ export class StoreService {
     longitude: number,
     latitude: number,
     categories: number[],
-    distance: number,
+    startMeter: number,
+    endMeter: number,
   ): Promise<Store[]> {
     const whereOptions = [];
     for (const category of categories) {
@@ -64,7 +65,8 @@ export class StoreService {
     //원하는 카테고리를 가진 stores
     const filteredStores = totalStores.filter((store) => {
       const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (d <= distance) {
+      console.log(d, store.id);
+      if (startMeter <= d && d <= endMeter) {
         return true;
       }
       return false;

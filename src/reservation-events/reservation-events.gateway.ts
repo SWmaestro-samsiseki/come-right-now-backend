@@ -18,6 +18,8 @@ import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
+import { Store } from 'src/store/store.entity';
+import { Category } from 'src/category/category.entity';
 
 @WebSocketGateway({
   cors: {
@@ -36,6 +38,24 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly websocketLogger: WebsocketLogger,
   ) {
     this.websocketLogger.setContext('reservation-events');
+  }
+
+  private async findStoreWithDistance(
+    startMeter: number,
+    endMeter: number,
+    categories: number[],
+    userLongitude: number,
+    userLatitude: number,
+  ): Promise<Store[]> {
+    const stores = await this.storeService.findCandidateStores(
+      userLongitude,
+      userLatitude,
+      categories,
+      startMeter,
+      endMeter,
+    );
+
+    return stores;
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -77,7 +97,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   ) {
     this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
     const userId = socket.data.uuid;
-    const distance = 500;
     const {
       categories,
       numberOfPeople,
@@ -85,14 +104,56 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       longitude,
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
-    // 1. 주점 검색
-    const stores = await this.storeService.findCandidateStores(
+    const stores = await this.findStoreWithDistance(0, 500, categories, longitude, latitude);
+
+    // 2. 주점으로 이벤트 전송
+    for (const store of stores) {
+      try {
+        const estimatedTime = await this.dateUtilService.getEstimatedTime(
+          latitude,
+          longitude,
+          store.latitude,
+          store.longitude,
+          delayMinutes,
+        );
+        const createReservationDTO: CreateReservationDTO = {
+          numberOfPeople,
+          estimatedTime,
+          userId,
+          delayMinutes,
+          storeId: store.id,
+        };
+        const reservationId = await this.reservationService.createReservation(createReservationDTO);
+
+        const storeSocketId = storeOnlineMap[store.id];
+        socket.to(storeSocketId).emit('server.find-store.store', reservationId);
+        this.websocketLogger.websocketEventLog('server.find-store.store', true, true);
+      } catch (e) {
+        this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+        this.websocketLogger.error(e);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  @SubscribeMessage('user.find-store-further.server')
+  async userFindStoreToServerFurther(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
+  ) {
+    this.websocketLogger.websocketEventLog('user.find-store-further.server', false, true);
+    const userId = socket.data.uuid;
+    const {
+      categories,
+      numberOfPeople,
+      delayMinutes,
       longitude,
       latitude,
-      categories,
-      distance,
-    );
-
+    }: userFindStoreServerDTO = userFindStoreServerDTO;
+    const stores = await this.findStoreWithDistance(500, 1000, categories, longitude, latitude);
+    console.log(stores);
     // 2. 주점으로 이벤트 전송
     for (const store of stores) {
       try {
