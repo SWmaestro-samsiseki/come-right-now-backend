@@ -19,7 +19,6 @@ import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
-import { Category } from 'src/category/category.entity';
 import { UseInterceptors } from '@nestjs/common';
 import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor';
 
@@ -107,10 +106,26 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       longitude,
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
-    const stores = await this.findStoreWithDistance(0, 500, categories, longitude, latitude);
+    let stores: Store[];
+    try {
+      stores = await this.findStoreWithDistance(0, 500, categories, longitude, latitude);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+      this.websocketLogger.error(e);
+      return false;
+    }
 
     // 2. 주점으로 이벤트 전송
+    let onlineStoreFlag = false;
     for (const store of stores) {
+      if (!(store.id in storeOnlineMap)) {
+        continue;
+      }
+
+      if (!onlineStoreFlag) {
+        onlineStoreFlag = true;
+      }
+
       try {
         const estimatedTime = await this.dateUtilService.getEstimatedTime(
           latitude,
@@ -138,6 +153,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       }
     }
 
+    if (!onlineStoreFlag) {
+      this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+      this.websocketLogger.error('no online store in condition');
+      return false;
+    }
+
     return true;
   }
 
@@ -155,9 +176,28 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       longitude,
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
-    const stores = await this.findStoreWithDistance(500, 1000, categories, longitude, latitude);
+
+    let stores: Store[];
+    try {
+      stores = await this.findStoreWithDistance(500, 1000, categories, longitude, latitude);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.find-store-further.store', true, false);
+      this.websocketLogger.error(e);
+      return false;
+    }
+
     // 2. 주점으로 이벤트 전송
+    let onlineStoreFlag = false;
+
     for (const store of stores) {
+      if (!(store.id in storeOnlineMap)) {
+        continue;
+      }
+
+      if (!onlineStoreFlag) {
+        onlineStoreFlag = true;
+      }
+
       try {
         const estimatedTime = await this.dateUtilService.getEstimatedTime(
           latitude,
@@ -183,6 +223,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         this.websocketLogger.error(e);
         return false;
       }
+    }
+
+    if (!onlineStoreFlag) {
+      this.websocketLogger.websocketEventLog('server.find-store-further.store', true, false);
+      this.websocketLogger.error('no online store in condition');
+      return false;
     }
 
     return true;
