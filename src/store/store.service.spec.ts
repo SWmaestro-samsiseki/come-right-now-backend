@@ -58,7 +58,8 @@ describe('storeService', () => {
       const longitude = 1;
       const latitude = 1;
       const categories = [1];
-      const distnace = 1;
+      const startMeter = 0;
+      const endMeter = 1;
       storeRepository.find.mockReturnValue([
         {
           latitude: 1,
@@ -70,7 +71,8 @@ describe('storeService', () => {
         longitude,
         latitude,
         categories,
-        distnace,
+        startMeter,
+        endMeter,
       );
 
       expect(result[0].latitude).toBe(1);
@@ -81,7 +83,9 @@ describe('storeService', () => {
       const longitude = 100;
       const latitude = 100;
       const categories = [1];
-      const distnace = 1;
+      const startMeter = 0;
+      const endMeter = 1;
+
       storeRepository.find.mockReturnValue([
         {
           latitude: 1,
@@ -90,7 +94,13 @@ describe('storeService', () => {
       ]);
 
       try {
-        await storeService.findCandidateStores(longitude, latitude, categories, distnace);
+        await storeService.findCandidateStores(
+          longitude,
+          latitude,
+          categories,
+          startMeter,
+          endMeter,
+        );
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
       }
