@@ -1,1 +1,1 @@
-export const storeOnlineMap: any = {};
+export const storeOnlineMap: Record<string, string> = {};

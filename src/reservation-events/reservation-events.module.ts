@@ -7,6 +7,8 @@ import { UserModule } from 'src/user/user.module';
 import { ReservationModule } from 'src/reservation/reservation.module';
 import { DateUtilModule } from 'src/date-util/date-util.module';
 import { LoggerModule } from 'src/logger/logger.module';
+import { storeOnlineMap } from './onlineMaps/store.onlineMap';
+import { userOnlineMap } from './onlineMaps/user.onlineMap';
 
 @Module({
   imports: [
@@ -18,7 +20,17 @@ import { LoggerModule } from 'src/logger/logger.module';
     ReservationModule,
     LoggerModule,
   ],
-  providers: [ReservationEventsGateway],
+  providers: [
+    ReservationEventsGateway,
+    {
+      provide: 'STORE_ONLINEMAP',
+      useValue: storeOnlineMap,
+    },
+    {
+      provide: 'USER_ONLINEMAP',
+      useValue: userOnlineMap,
+    },
+  ],
   exports: [ReservationEventsGateway],
   controllers: [ReservationEventsController],
 })

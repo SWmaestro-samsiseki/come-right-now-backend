@@ -1,1 +1,1 @@
-export const userOnlineMap: any = {};
+export const userOnlineMap: Record<string, string> = {};
