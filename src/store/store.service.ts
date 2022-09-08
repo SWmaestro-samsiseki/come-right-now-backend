@@ -65,7 +65,6 @@ export class StoreService {
     //원하는 카테고리를 가진 stores
     const filteredStores = totalStores.filter((store) => {
       const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      console.log(d, store.id);
       if (startMeter <= d && d <= endMeter) {
         return true;
       }

@@ -20,6 +20,8 @@ import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
 import { Category } from 'src/category/category.entity';
+import { UseInterceptors } from '@nestjs/common';
+import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor';
 
 @WebSocketGateway({
   cors: {
@@ -27,6 +29,7 @@ import { Category } from 'src/category/category.entity';
     credentials: true,
   },
 })
+@UseInterceptors(new NewrelicWebsocketInterceptor())
 export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
@@ -153,7 +156,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       latitude,
     }: userFindStoreServerDTO = userFindStoreServerDTO;
     const stores = await this.findStoreWithDistance(500, 1000, categories, longitude, latitude);
-    console.log(stores);
     // 2. 주점으로 이벤트 전송
     for (const store of stores) {
       try {
