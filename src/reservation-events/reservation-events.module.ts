@@ -9,6 +9,7 @@ import { DateUtilModule } from 'src/date-util/date-util.module';
 import { LoggerModule } from 'src/logger/logger.module';
 import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 import { userOnlineMap } from './onlineMaps/user.onlineMap';
+import { NewrelicModule } from 'src/newrelic/newrelic.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { userOnlineMap } from './onlineMaps/user.onlineMap';
     DateUtilModule,
     ReservationModule,
     LoggerModule,
+    NewrelicModule,
   ],
   providers: [
     ReservationEventsGateway,

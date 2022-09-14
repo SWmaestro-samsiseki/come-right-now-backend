@@ -5,9 +5,8 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
-  WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { AccountService } from 'src/account/account.service';
 import { userFindStoreServerDTO } from './dto/user-find-store-server.dto';
 import { StoreService } from 'src/store/store.service';
@@ -18,7 +17,7 @@ import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
 import { Inject, UseInterceptors } from '@nestjs/common';
-import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor';
+import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
 
 @WebSocketGateway({
   cors: {
@@ -26,10 +25,8 @@ import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor
     credentials: true,
   },
 })
-@UseInterceptors(new NewrelicWebsocketInterceptor())
+@UseInterceptors(NewrelicWebsocketInterceptor)
 export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
-
   constructor(
     private readonly accountService: AccountService,
     private readonly storeService: StoreService,
