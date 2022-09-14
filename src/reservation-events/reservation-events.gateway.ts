@@ -109,7 +109,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     } catch (e) {
       this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
       this.websocketLogger.error(e);
-      return false;
+      return {
+        isSuccess: false,
+        message: '주변에 가게가 없습니다.',
+      };
     }
 
     // 2. 주점으로 이벤트 전송
@@ -146,17 +149,25 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       } catch (e) {
         this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
         this.websocketLogger.error(e);
-        return false;
+        return {
+          isSuccess: false,
+          message: '잠시 후에 다시 탐색하세요.',
+        };
       }
     }
 
     if (!onlineStoreFlag) {
       this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
       this.websocketLogger.error('no online store in condition');
-      return false;
+      return {
+        isSuccess: false,
+        message: '주변에 가게가 없습니다.',
+      };
     }
 
-    return true;
+    return {
+      isSuccess: true,
+    };
   }
 
   @SubscribeMessage('user.find-store-further.server')
@@ -180,12 +191,14 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     } catch (e) {
       this.websocketLogger.websocketEventLog('server.find-store-further.store', true, false);
       this.websocketLogger.error(e);
-      return false;
+      return {
+        isSuccess: false,
+        message: '주변에 가게가 없습니다.',
+      };
     }
 
     // 2. 주점으로 이벤트 전송
     let onlineStoreFlag = false;
-
     for (const store of stores) {
       if (!(store.id in this.storeOnlineMap)) {
         continue;
@@ -218,17 +231,25 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
       } catch (e) {
         this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
         this.websocketLogger.error(e);
-        return false;
+        return {
+          isSuccess: false,
+          message: '잠시 후에 다시 탐색하세요.',
+        };
       }
     }
 
     if (!onlineStoreFlag) {
-      this.websocketLogger.websocketEventLog('server.find-store-further.store', true, false);
+      this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
       this.websocketLogger.error('no online store in condition');
-      return false;
+      return {
+        isSuccess: false,
+        message: '주변에 가게가 없습니다.',
+      };
     }
 
-    return true;
+    return {
+      isSuccess: true,
+    };
   }
 
   @SubscribeMessage('store.accept-seat.server')
