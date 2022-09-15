@@ -13,6 +13,7 @@ import { ReservationEventsModule } from './reservation-events/reservation-events
 import { DateUtilModule } from './date-util/date-util.module';
 import { LoggerModule } from './logger/logger.module';
 import { NewrelicModule } from './newrelic/newrelic.module';
+import { TimeDealModule } from './time-deal/time-deal.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { NewrelicModule } from './newrelic/newrelic.module';
     DateUtilModule,
     LoggerModule,
     NewrelicModule,
+    TimeDealModule,
   ],
   controllers: [AppController],
   providers: [AppService],
