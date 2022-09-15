@@ -5,12 +5,9 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
-  WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { AccountService } from 'src/account/account.service';
-import { userOnlineMap } from './onlineMaps/user.onlineMap';
-import { storeOnlineMap } from './onlineMaps/store.onlineMap';
 import { userFindStoreServerDTO } from './dto/user-find-store-server.dto';
 import { StoreService } from 'src/store/store.service';
 import { DateUtilService } from 'src/date-util/date-util.service';
@@ -19,8 +16,8 @@ import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
-import { UseInterceptors } from '@nestjs/common';
-import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor';
+import { Inject, UseInterceptors } from '@nestjs/common';
+import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
 
 @WebSocketGateway({
   cors: {
@@ -28,16 +25,16 @@ import { NewrelicWebsocketInterceptor } from 'src/newrelic.websocket.interceptor
     credentials: true,
   },
 })
-@UseInterceptors(new NewrelicWebsocketInterceptor())
+@UseInterceptors(NewrelicWebsocketInterceptor)
 export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
-
   constructor(
     private readonly accountService: AccountService,
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
     private readonly reservationService: ReservationService,
     private readonly websocketLogger: WebsocketLogger,
+    @Inject('STORE_ONLINEMAP') private storeOnlineMap: Record<string, string>,
+    @Inject('USER_ONLINEMAP') private userOnlineMap: Record<string, string>,
   ) {
     this.websocketLogger.setContext('reservation-events');
   }
@@ -63,12 +60,12 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     const { uuid: id, userType } = socket.data;
     if (userType === 'USER') {
-      if (id in userOnlineMap) {
-        delete userOnlineMap[id];
+      if (id in this.userOnlineMap) {
+        delete this.userOnlineMap[id];
       }
     } else if (userType === 'STORE') {
-      if (id in storeOnlineMap) {
-        delete storeOnlineMap[id];
+      if (id in this.storeOnlineMap) {
+        delete this.storeOnlineMap[id];
       }
     }
 
@@ -80,9 +77,9 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     const payload = this.accountService.getPayload(token);
     const { uuid, userType } = payload;
     if (userType === 'USER') {
-      userOnlineMap[uuid] = socket.id;
+      this.userOnlineMap[uuid] = socket.id;
     } else if (userType === 'STORE') {
-      storeOnlineMap[uuid] = socket.id;
+      this.storeOnlineMap[uuid] = socket.id;
     }
     socket.data = {
       uuid,
@@ -118,7 +115,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     // 2. 주점으로 이벤트 전송
     let onlineStoreFlag = false;
     for (const store of stores) {
-      if (!(store.id in storeOnlineMap)) {
+      if (!(store.id in this.storeOnlineMap)) {
         continue;
       }
 
@@ -143,7 +140,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);
 
-        const storeSocketId = storeOnlineMap[store.id];
+        const storeSocketId = this.storeOnlineMap[store.id];
         socket.to(storeSocketId).emit('server.find-store.store', reservationId);
         this.websocketLogger.websocketEventLog('server.find-store.store', true, true);
       } catch (e) {
@@ -190,7 +187,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     let onlineStoreFlag = false;
 
     for (const store of stores) {
-      if (!(store.id in storeOnlineMap)) {
+      if (!(store.id in this.storeOnlineMap)) {
         continue;
       }
 
@@ -215,7 +212,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
         };
         const reservationId = await this.reservationService.createReservation(createReservationDTO);
 
-        const storeSocketId = storeOnlineMap[store.id];
+        const storeSocketId = this.storeOnlineMap[store.id];
         socket.to(storeSocketId).emit('server.find-store.store', reservationId);
         this.websocketLogger.websocketEventLog('server.find-store.store', true, true);
       } catch (e) {
@@ -254,7 +251,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
 
       await this.reservationService.updateReservationStatus(reservationId, 'PENDING');
 
-      const userSocketId = userOnlineMap[userId];
+      const userSocketId = this.userOnlineMap[userId];
       socket.to(userSocketId).emit('server.available-seat.user', reservationId);
       this.websocketLogger.websocketEventLog('store.accept-seat.server', true, true);
       return {
@@ -280,7 +277,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     try {
       await this.reservationService.updateReservationStatus(reservationId, 'RESERVED');
 
-      const storeSocketId = storeOnlineMap[storeId];
+      const storeSocketId = this.storeOnlineMap[storeId];
       socket.to(storeSocketId).emit('server.make-reservation.store', reservationId);
       this.websocketLogger.websocketEventLog('server.make-reservation.store', true, true);
 
@@ -313,7 +310,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
           delayedTime,
           delayedCount,
         );
-        const storeSocketId = storeOnlineMap[store.id];
+        const storeSocketId = this.storeOnlineMap[store.id];
         socket
           .to(storeSocketId)
           .emit('server.delay-reservation.store', { reservationId, estimatedTime: delayedTime });
@@ -345,7 +342,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     try {
       await this.reservationService.updateArrivalForCheckIn(reservationId);
 
-      const userSocketId = userOnlineMap[userId];
+      const userSocketId = this.userOnlineMap[userId];
       socket.to(userSocketId).emit('server.check-in.user', reservationId);
       this.websocketLogger.websocketEventLog('server.check-in.user', true, true);
     } catch (e) {
@@ -365,13 +362,13 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketEventLog('store.cancel-reservation.server', false, true);
     const reservation = await this.reservationService.getReservationById(reservationId);
     const userId = reservation.user.id;
-    if (!(userId in userOnlineMap)) {
+    if (!(userId in this.userOnlineMap)) {
       return {
         reservationId,
         isSuccess: true,
       };
     }
-    const userSocketId = userOnlineMap[userId];
+    const userSocketId = this.userOnlineMap[userId];
 
     try {
       socket.to(userSocketId).emit('server.cancel-reservation.user', reservationId);
@@ -399,13 +396,13 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketEventLog('user.cancel-reservation.server', false, true);
     const reservation = await this.reservationService.getReservationById(reservationId);
     const storeId = reservation.store.id;
-    if (!(storeId in storeOnlineMap)) {
+    if (!(storeId in this.storeOnlineMap)) {
       return {
         reservationId,
         isSuccess: true,
       };
     }
-    const storeSocketId = storeOnlineMap[storeId];
+    const storeSocketId = this.storeOnlineMap[storeId];
 
     try {
       socket.to(storeSocketId).emit('server.cancel-reservation.store', reservationId);

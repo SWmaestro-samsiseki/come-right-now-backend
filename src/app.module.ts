@@ -12,8 +12,7 @@ import { AccountModule } from './account/account.module';
 import { ReservationEventsModule } from './reservation-events/reservation-events.module';
 import { DateUtilModule } from './date-util/date-util.module';
 import { LoggerModule } from './logger/logger.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { NewrelicInterceptor } from './newrelic.interceptor';
+import { NewrelicModule } from './newrelic/newrelic.module';
 
 @Module({
   imports: [
@@ -39,14 +38,9 @@ import { NewrelicInterceptor } from './newrelic.interceptor';
     ReservationEventsModule,
     DateUtilModule,
     LoggerModule,
+    NewrelicModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: NewrelicInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
