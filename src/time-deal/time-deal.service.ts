@@ -1,5 +1,6 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { StoreService } from 'src/store/store.service';
 import { Repository } from 'typeorm';
 import { TimeDeal, TimeDealStatus } from './time-deal.entity';
 
@@ -7,7 +8,7 @@ import { TimeDeal, TimeDealStatus } from './time-deal.entity';
 export class TimeDealService {
   constructor(
     @InjectRepository(TimeDeal) private readonly timeDealRepository: Repository<TimeDeal>,
-    @Inject('TIME_DEAL_STATUS') private readonly timeDealStatus: TimeDealStatus,
+    private readonly storeService: StoreService,
   ) {}
 
   async getStoreTimeDeal(storeId: string): Promise<TimeDeal> {
@@ -27,5 +28,28 @@ export class TimeDealService {
     }
 
     return timeDeal;
+  }
+
+  async getUserTimeDeals(latitude: number, longitude: number) {
+    const stores = await this.storeService.getStoreWithTimeDeal();
+    const nearStores = this.storeService.findNearStores(latitude, longitude, 0, 500, stores);
+    const whereOptions = [];
+    for (const nearStore of nearStores) {
+      whereOptions.push({
+        store: {
+          id: nearStore.id,
+        },
+      });
+    }
+
+    const timeDeals = await this.timeDealRepository.find({
+      relations: ['store'],
+      where: whereOptions,
+    });
+
+    if (timeDeals.length === 0) {
+      throw new NotFoundException('no time deal in condition');
+    }
+    return timeDeals;
   }
 }

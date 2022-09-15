@@ -1,18 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { StoreModule } from 'src/store/store.module';
 import { TimeDealController } from './time-deal.controller';
-import { TimeDeal, TimeDealStatus } from './time-deal.entity';
+import { TimeDeal } from './time-deal.entity';
 import { TimeDealService } from './time-deal.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TimeDeal])],
+  imports: [TypeOrmModule.forFeature([TimeDeal]), StoreModule],
   controllers: [TimeDealController],
-  providers: [
-    TimeDealService,
-    {
-      provide: 'TIME_DEAL_STATUS',
-      useValue: TimeDealStatus,
-    },
-  ],
+  providers: [TimeDealService],
 })
 export class TimeDealModule {}

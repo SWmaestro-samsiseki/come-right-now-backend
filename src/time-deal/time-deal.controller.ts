@@ -5,8 +5,16 @@ import { TimeDealService } from './time-deal.service';
 export class TimeDealController {
   constructor(private readonly timeDealService: TimeDealService) {}
 
-  @Get()
+  @Get('store')
   async getStoreTimeDeal(@Query('storeId') storeId: string) {
     return await this.timeDealService.getStoreTimeDeal(storeId);
+  }
+
+  @Get('user')
+  async getUserTimeDeals(
+    @Query('latitude') userLatitude: number,
+    @Query('longitude') userLongitude: number,
+  ) {
+    return await this.timeDealService.getUserTimeDeals(userLatitude, userLongitude);
   }
 }
