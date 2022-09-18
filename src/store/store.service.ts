@@ -140,9 +140,8 @@ export class StoreService {
     }
 
     const { businessHours } = store;
-    const todayBusinessHours = businessHours.filter(
-      (bh) => bh.businessDay === this.dateUtilService.getDayOfWeekToday(),
-    )[0];
+    const dayOfWeekToday = this.dateUtilService.getDayOfWeekToday();
+    const todayBusinessHours = businessHours.filter((bh) => bh.businessDay === dayOfWeekToday)[0];
 
     const storeForPublicDTO: StoreForPublicDTO = {
       ...store,

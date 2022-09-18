@@ -18,7 +18,6 @@ import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
 import { Inject, UseInterceptors } from '@nestjs/common';
 import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
-import { makeTimeDealDTO } from './dto/makeTImeDeal.dto';
 
 @WebSocketGateway({
   cors: {
