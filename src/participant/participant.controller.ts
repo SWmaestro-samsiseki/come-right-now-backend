@@ -10,7 +10,7 @@ export class ParticipantController {
   async createParticipant(@Body() createParticipantDTO: CreateParticipantDTO) {
     const { timeDealId } = createParticipantDTO;
     //FIXME : user ID 로그인 정보 통해 가져오기
-    const userId = 'u9';
+    const userId = 'u1';
 
     return await this.participantService.createParticipant(timeDealId, userId);
   }
