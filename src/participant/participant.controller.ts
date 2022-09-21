@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateParticipantDTO } from './dto/create-participant.dto';
 import { ParticipantService } from './participant.service';
 
@@ -7,10 +8,10 @@ export class ParticipantController {
   constructor(private readonly participantService: ParticipantService) {}
 
   @Post()
-  async createParticipant(@Body() createParticipantDTO: CreateParticipantDTO) {
+  @UseGuards(AuthGuard())
+  async createParticipant(@Request() req, @Body() createParticipantDTO: CreateParticipantDTO) {
     const { timeDealId } = createParticipantDTO;
-    //FIXME : user ID 로그인 정보 통해 가져오기
-    const userId = 'u1';
+    const userId = req.user.id;
 
     return await this.participantService.createParticipant(timeDealId, userId);
   }
