@@ -43,6 +43,9 @@ export class TimeDealService {
         },
       });
     }
+    whereOptions.push({
+      status: TimeDealStatus.IN_PROGRESS,
+    });
 
     const timeDeals = await this.timeDealRepository.find({
       relations: ['store'],

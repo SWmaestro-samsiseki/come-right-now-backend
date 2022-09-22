@@ -1,0 +1,15 @@
+{
+  "config": {
+    "target": "http://localhost:8080",
+    "phases": [{ "duration": 10, "arrivalRate": 100 }]
+  },
+  "scenarios": [
+    {
+      "name": "get request",
+      "flow": [
+        { "get": { "url": "/reservation/store/u2?status=reserved" } },
+        { "get": { "url": "/reservation/store/u2?status=requested" } }
+      ]
+    }
+  ]
+}

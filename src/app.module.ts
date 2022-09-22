@@ -14,6 +14,7 @@ import { DateUtilModule } from './date-util/date-util.module';
 import { LoggerModule } from './logger/logger.module';
 import { NewrelicModule } from './newrelic/newrelic.module';
 import { TimeDealModule } from './time-deal/time-deal.module';
+import { ParticipantModule } from './participant/participant.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TimeDealModule } from './time-deal/time-deal.module';
     LoggerModule,
     NewrelicModule,
     TimeDealModule,
+    ParticipantModule,
   ],
   controllers: [AppController],
   providers: [AppService],

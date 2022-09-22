@@ -14,6 +14,7 @@ import { BusinessHour } from './business-hour/business-hour.entity';
 import { Account } from './account/account.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
 import { WebsocketLogger } from './logger/logger.service';
+import { NewrelicInterceptor } from './newrelic/newrelic.interceptor';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -33,6 +34,7 @@ async function initServer(port: number) {
   app.enableCors();
   app.use(morgan('tiny'));
   app.useLogger(new WebsocketLogger());
+  app.useGlobalInterceptors(new NewrelicInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('지금갈게 API Document')
