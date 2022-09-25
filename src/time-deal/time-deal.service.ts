@@ -41,11 +41,9 @@ export class TimeDealService {
         store: {
           id: nearStore.id,
         },
+        status: TimeDealStatus.IN_PROGRESS,
       });
     }
-    whereOptions.push({
-      status: TimeDealStatus.IN_PROGRESS,
-    });
 
     const timeDeals = await this.timeDealRepository.find({
       relations: ['store'],
