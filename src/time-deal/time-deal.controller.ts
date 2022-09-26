@@ -8,6 +8,7 @@ export class TimeDealController {
 
   @Get('store')
   async getStoreTimeDeal(@Query('storeId') storeId: string) {
+    await this.timeDealService.checkTimeDealValidation();
     return await this.timeDealService.getStoreTimeDeal(storeId);
   }
 
@@ -16,6 +17,7 @@ export class TimeDealController {
     @Query('latitude') userLatitude: number,
     @Query('longitude') userLongitude: number,
   ) {
+    await this.timeDealService.checkTimeDealValidation();
     return await this.timeDealService.getUserTimeDeals(userLatitude, userLongitude);
   }
 
