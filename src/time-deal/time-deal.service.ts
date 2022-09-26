@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { StoreService } from 'src/store/store.service';
-import { Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { TimeDeal, TimeDealStatus } from './time-deal.entity';
 
 @Injectable()
@@ -41,11 +41,9 @@ export class TimeDealService {
         store: {
           id: nearStore.id,
         },
+        status: TimeDealStatus.IN_PROGRESS,
       });
     }
-    whereOptions.push({
-      status: TimeDealStatus.IN_PROGRESS,
-    });
 
     const timeDeals = await this.timeDealRepository.find({
       relations: ['store'],
@@ -76,5 +74,21 @@ export class TimeDealService {
       },
     });
     return result;
+  }
+
+  async checkTimeDealValidation() {
+    const nowDate = this.dateUtilService.getNowDate();
+    const expiredTimeDeals = await this.timeDealRepository.find({
+      where: {
+        endTime: LessThan(nowDate),
+      },
+    });
+
+    if (expiredTimeDeals.length !== 0) {
+      for (const expiredTimeDeal of expiredTimeDeals) {
+        expiredTimeDeal.status = TimeDealStatus.CLOSED;
+        await expiredTimeDeal.save();
+      }
+    }
   }
 }
