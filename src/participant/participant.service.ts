@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TimeDeal, TimeDealStatus } from 'src/time-deal/time-deal.entity';
+import { TimeDealStatus } from 'src/enum/time-deal-status';
+import { TimeDeal } from 'src/time-deal/time-deal.entity';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Participant } from './participant.entity';

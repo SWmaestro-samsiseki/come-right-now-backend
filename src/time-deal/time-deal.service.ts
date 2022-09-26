@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
+import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { StoreService } from 'src/store/store.service';
 import { LessThan, MoreThan, Repository } from 'typeorm';
-import { TimeDeal, TimeDealStatus } from './time-deal.entity';
+import { TimeDeal } from './time-deal.entity';
 
 @Injectable()
 export class TimeDealService {
