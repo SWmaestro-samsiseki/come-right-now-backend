@@ -1,9 +1,20 @@
-import { Body, Controller, Get, Post, Query, UseGuards, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TimeDealService } from './time-deal.service';
 
 @Controller('time-deal')
 export class TimeDealController {
+  reservationService: any;
   constructor(private readonly timeDealService: TimeDealService) {}
 
   @Get('store')
@@ -30,5 +41,10 @@ export class TimeDealController {
   ) {
     const storeId = req.user.id;
     return await this.timeDealService.createTimeDeal(duration, benefits, storeId);
+  }
+
+  @Patch(':id/close')
+  async closeTimeDeal(@Param('id') timeDealId: number): Promise<Number> {
+    return await this.timeDealService.closeTimeDeal(timeDealId);
   }
 }

@@ -92,4 +92,18 @@ export class TimeDealService {
       }
     }
   }
+
+  async closeTimeDeal(timeDealId: number) {
+    const closedStatus = TimeDealStatus.CLOSED;
+    const result = await this.timeDealRepository.update(
+      { id: timeDealId },
+      { status: closedStatus },
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException();
+    }
+
+    return timeDealId;
+  }
 }
