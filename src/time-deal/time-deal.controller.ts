@@ -54,7 +54,7 @@ export class TimeDealController {
   @UseGuards(AuthGuard())
   async getTimeDealsByUserId(
     @getAccount() account: Account,
-    @Body() data: { longitude: number; latitude: number },
+    @Query() data: { latitude: number; longitude: number },
   ) {
     const userId = account.id;
     const { longitude, latitude } = data;
