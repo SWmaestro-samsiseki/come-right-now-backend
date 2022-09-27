@@ -10,6 +10,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Account } from 'src/account/account.entity';
+import { getAccount } from 'src/account/get-account.decorator';
 import { TimeDealService } from './time-deal.service';
 
 @Controller('time-deal')
@@ -46,5 +48,16 @@ export class TimeDealController {
   @Patch(':id/close')
   async closeTimeDeal(@Param('id') timeDealId: number): Promise<Number> {
     return await this.timeDealService.closeTimeDeal(timeDealId);
+  }
+
+  @Get('userDeals')
+  @UseGuards(AuthGuard())
+  async getTimeDealsByUserId(
+    @getAccount() account: Account,
+    @Body() data: { longitude: number; latitude: number },
+  ) {
+    const userId = account.id;
+    const { longitude, latitude } = data;
+    return await this.timeDealService.getTimeDealsByUserId(userId, longitude, latitude);
   }
 }

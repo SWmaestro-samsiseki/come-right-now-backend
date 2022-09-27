@@ -1,17 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
+import { ParticipantStatus } from 'src/enum/participant-status';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { StoreService } from 'src/store/store.service';
-import { LessThan, MoreThan, Repository } from 'typeorm';
+import {
+  LessThan,
+  DataSource,
+  MoreThan,
+  Repository,
+  ConnectionOptionsReader,
+  EntityManager,
+} from 'typeorm';
 import { TimeDeal } from './time-deal.entity';
 
 @Injectable()
 export class TimeDealService {
   constructor(
-    @InjectRepository(TimeDeal) private readonly timeDealRepository: Repository<TimeDeal>,
+    @InjectRepository(TimeDeal) private readonly timeDealRepository,
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
+    @InjectEntityManager() private timeDealManager: EntityManager,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getStoreTimeDeal(storeId: string): Promise<TimeDeal> {
@@ -105,5 +115,35 @@ export class TimeDealService {
     }
 
     return timeDealId;
+  }
+
+  async getTimeDealsByUserId(userId: string, longitude: number, latitude: number) {
+    console.log(latitude, longitude);
+
+    const timeDeals = await this.timeDealManager.query(
+      `
+      SELECT t.id,
+             t.benefit,
+             t.endtime,
+             s.businessname,
+             s.storeimage,
+             s.latitude,
+             s.longitude,
+             Round(St_distance_sphere(Point(?, ?),
+                        Point(s.longitude, s.latitude))) AS distance
+      FROM  time_deal t
+            LEFT JOIN store s
+                    ON t.storeid = s.id
+            LEFT JOIN participant p
+                    ON t.id = p.timedealid
+      WHERE p.userid = ?
+            AND p.status = ?
+      `,
+      [longitude, latitude, userId, ParticipantStatus.REQUESTED],
+    );
+
+    console.log(timeDeals);
+
+    return timeDeals;
   }
 }
