@@ -12,6 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
+import { UserTimeDealsDTO } from './dto/user-time-deals.dto';
 import { TimeDealService } from './time-deal.service';
 
 @Controller('time-deal')
@@ -55,7 +56,7 @@ export class TimeDealController {
   async getTimeDealsByUserId(
     @getAccount() account: Account,
     @Query() data: { latitude: number; longitude: number },
-  ) {
+  ): Promise<UserTimeDealsDTO> {
     const userId = account.id;
     const { longitude, latitude } = data;
     return await this.timeDealService.getTimeDealsByUserId(userId, longitude, latitude);

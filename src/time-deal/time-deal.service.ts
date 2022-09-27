@@ -12,6 +12,7 @@ import {
   ConnectionOptionsReader,
   EntityManager,
 } from 'typeorm';
+import { UserTimeDealsDTO } from './dto/user-time-deals.dto';
 import { TimeDeal } from './time-deal.entity';
 
 @Injectable()
@@ -117,9 +118,11 @@ export class TimeDealService {
     return timeDealId;
   }
 
-  async getTimeDealsByUserId(userId: string, longitude: number, latitude: number) {
-    console.log(latitude, longitude);
-
+  async getTimeDealsByUserId(
+    userId: string,
+    longitude: number,
+    latitude: number,
+  ): Promise<UserTimeDealsDTO> {
     const timeDeals = await this.timeDealManager.query(
       `
       SELECT t.id,
@@ -141,8 +144,6 @@ export class TimeDealService {
       `,
       [longitude, latitude, userId, ParticipantStatus.REQUESTED],
     );
-
-    console.log(timeDeals);
 
     return timeDeals;
   }
