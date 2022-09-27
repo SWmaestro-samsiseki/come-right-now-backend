@@ -1,17 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectDataSource, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { ParticipantStatus } from 'src/enum/participant-status';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { StoreService } from 'src/store/store.service';
-import {
-  LessThan,
-  DataSource,
-  MoreThan,
-  Repository,
-  ConnectionOptionsReader,
-  EntityManager,
-} from 'typeorm';
+import { LessThan, EntityManager } from 'typeorm';
 import { UserTimeDealsDTO } from './dto/user-time-deals.dto';
 import { TimeDeal } from './time-deal.entity';
 
@@ -22,7 +15,6 @@ export class TimeDealService {
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
     @InjectEntityManager() private timeDealManager: EntityManager,
-    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getStoreTimeDeal(storeId: string): Promise<TimeDeal> {
