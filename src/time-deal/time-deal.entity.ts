@@ -1,11 +1,7 @@
+import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { Participant } from 'src/participant/participant.entity';
 import { Store } from 'src/store/store.entity';
 import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-
-export enum TimeDealStatus {
-  IN_PROGRESS = 'IN_PROGRESS',
-  CLOSED = 'CLOSED',
-}
 
 @Entity()
 export class TimeDeal extends BaseEntity {
