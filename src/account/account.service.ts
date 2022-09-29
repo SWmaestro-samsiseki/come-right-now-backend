@@ -4,6 +4,13 @@ import { Repository } from 'typeorm';
 import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { Account } from './account.entity';
 import { JwtService } from '@nestjs/jwt';
+import { UserType } from 'src/enum/user-type.enum';
+
+type JWTPayload = {
+  uuid: string;
+  email: string;
+  userType: UserType;
+};
 
 @Injectable()
 export class AccountService {
@@ -16,9 +23,8 @@ export class AccountService {
     const { email, password } = loginInputDto;
     const account = await this.accountRepository.findOne({ where: { email } });
     // FIXME: 암호화
-    //if (account && (await bcrypt.compare(password, account.password))) {
     if (account && password === account.password) {
-      const payload = { uuid: account.id, email, userType: account.userType };
+      const payload: JWTPayload = { uuid: account.id, email, userType: account.userType };
       const accessToken = this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET_KEY,
       });
@@ -33,8 +39,8 @@ export class AccountService {
     }
   }
 
-  getPayload(token: string) {
-    const decoded = this.jwtService.verify(token, {
+  getPayload(token: string): JWTPayload {
+    const decoded: JWTPayload = this.jwtService.verify(token, {
       secret: process.env.JWT_SECRET_KEY,
     });
 

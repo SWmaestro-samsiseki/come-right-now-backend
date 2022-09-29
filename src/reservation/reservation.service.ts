@@ -45,8 +45,6 @@ export class ReservationService {
       ),
     };
 
-    console.log(result.departureTime, reservation.delayMinutes);
-
     return result;
   }
 
