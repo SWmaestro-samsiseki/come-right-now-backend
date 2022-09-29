@@ -15,6 +15,7 @@ import { Account } from './account/account.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
 import { WebsocketLogger } from './logger/logger.service';
 import { NewrelicInterceptor } from './newrelic/newrelic.interceptor';
+import { RedisIoAdapter } from './redis.adapter';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -31,6 +32,10 @@ async function initServer(port: number) {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+
+  app.useWebSocketAdapter(redisIoAdapter);
   app.enableCors();
   app.use(morgan('tiny'));
   app.useLogger(new WebsocketLogger());
