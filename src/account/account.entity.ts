@@ -17,7 +17,7 @@ export class Account extends BaseEntity {
   @ApiProperty()
   public password: string;
 
-  @Column({ type: 'enum', enum: UserType, default: UserType })
+  @Column({ type: 'enum', enum: UserType, default: UserType.USER })
   @ApiProperty()
   public userType: UserType;
 }
