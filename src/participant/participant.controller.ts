@@ -1,6 +1,8 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateParticipantDTO } from './dto/create-participant.dto';
+import { Account } from 'src/account/account.entity';
+import { getAccount } from 'src/account/get-account.decorator';
+import { CreateParticipantInputDTO } from './dto/create-participant.dto';
 import { ParticipantService } from './participant.service';
 
 @Controller('participant')
@@ -9,9 +11,12 @@ export class ParticipantController {
 
   @Post()
   @UseGuards(AuthGuard())
-  async createParticipant(@Request() req, @Body() createParticipantDTO: CreateParticipantDTO) {
+  async createParticipant(
+    @getAccount() account: Account,
+    @Body() createParticipantDTO: CreateParticipantInputDTO,
+  ) {
     const { timeDealId } = createParticipantDTO;
-    const userId = req.user.id;
+    const userId = account.id;
 
     return await this.participantService.createParticipant(timeDealId, userId);
   }

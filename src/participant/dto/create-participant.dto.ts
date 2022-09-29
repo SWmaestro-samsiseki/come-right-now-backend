@@ -1,3 +1,3 @@
-export class CreateParticipantDTO {
+export class CreateParticipantInputDTO {
   timeDealId: number;
 }

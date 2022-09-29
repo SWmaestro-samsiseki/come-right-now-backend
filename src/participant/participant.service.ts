@@ -14,7 +14,7 @@ export class ParticipantService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async createParticipant(timeDealId: number, userId: string) {
+  async findAndCheckTimeDeal(timeDealId: number): Promise<TimeDeal> {
     const timeDeal = await this.timeDealRepository.findOne({
       where: {
         id: timeDealId,
@@ -29,16 +29,19 @@ export class ParticipantService {
       throw new BadRequestException('time deal is closed');
     }
 
+    return timeDeal;
+  }
+
+  async createParticipant(timeDealId: number, userId: string) {
+    const timeDeal = await this.findAndCheckTimeDeal(timeDealId);
+
     const user = await this.userRepository.findOne({
       where: {
         id: userId,
       },
     });
-    const participant = this.participantRepository.create();
-    participant.user = user;
-    participant.timeDeal = timeDeal;
 
-    const { id } = await this.participantRepository.save(participant);
+    const { id } = await this.participantRepository.save({ user, timeDeal });
 
     return {
       timeDealId,
