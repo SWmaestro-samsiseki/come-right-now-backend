@@ -47,7 +47,7 @@ export class TimeDealController {
   }
 
   @Patch(':id/close')
-  async closeTimeDeal(@Param('id') timeDealId: number): Promise<Number> {
+  async closeTimeDeal(@Param('id') timeDealId: number): Promise<number> {
     return await this.timeDealService.closeTimeDeal(timeDealId);
   }
 
