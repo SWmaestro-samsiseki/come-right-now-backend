@@ -24,7 +24,7 @@ import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.in
     origin: '*',
     credentials: true,
   },
-  transports: ['websocket'],
+  transports: ['websocket', 'polling'],
 })
 @UseInterceptors(NewrelicWebsocketInterceptor)
 export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
