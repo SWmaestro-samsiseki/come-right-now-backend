@@ -80,6 +80,9 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
 
   handleConnection(@ConnectedSocket() socket: Socket) {
     const token = socket.handshake.headers.auth as string;
+    if (!token) {
+      return;
+    }
     const payload = this.accountService.getPayload(token);
     const { uuid, userType } = payload;
     if (userType === 'USER') {
