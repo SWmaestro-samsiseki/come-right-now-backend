@@ -79,8 +79,21 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
-    const token = socket.handshake.headers.auth as string;
+    let token: string;
+    if (socket.handshake.headers.auth) {
+      token = socket.handshake.headers.auth as string;
+    } else if (socket.handshake.auth.token) {
+      token = socket.handshake.auth.token;
+    }
+
     if (!token) {
+      const uuid = 'mock' + Math.floor(Math.random() * 100000);
+      this.userOnlineMap[uuid] = socket.id;
+      socket.data = {
+        uuid,
+        userType: 'USER',
+      };
+      this.websocketLogger.websocketConnectionLog(true, socket.id, 'USER');
       return;
     }
     const payload = this.accountService.getPayload(token);
