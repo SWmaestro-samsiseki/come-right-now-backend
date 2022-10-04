@@ -67,7 +67,7 @@ describe('storeService', () => {
         },
       ]);
 
-      const result = await storeService.findCandidateStores(
+      const result = await storeService.findStoresNearUser(
         longitude,
         latitude,
         categories,
@@ -94,7 +94,7 @@ describe('storeService', () => {
       ]);
 
       try {
-        await storeService.findCandidateStores(
+        await storeService.findStoresNearUser(
           longitude,
           latitude,
           categories,
