@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Account } from 'src/account/account.entity';
+import { Participant } from 'src/participant/participant.entity';
 import { Reservation } from 'src/reservation/reservation.entity';
 import {
   Entity,
@@ -9,6 +10,7 @@ import {
   PrimaryColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -37,6 +39,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   public reservations: Reservation[];
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  public participants: Participant[];
 
   public account: Account;
 }

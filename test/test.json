@@ -1,0 +1,31 @@
+{
+  "config": {
+    "target": "http://localhost:8080",
+    "socketio": {
+      "extraHeaders": {
+        "auth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoidTEiLCJ1c2VyVHlwZSI6IlVTRVIiLCJpYXQiOjE1MTYyMzkwMjJ9.w_prx5RNNzWhwPOspbxqJfgVUuY68AHTGRCvGSn2OWk"
+      }
+    },
+    "phases": [{ "duration": 60, "arrivalRate": 100 }]
+  },
+  "scenarios": [
+    {
+      "name": "find-store",
+      "engine": "socketio",
+      "flow": [
+        {
+          "emit": {
+            "channel": "user.find-store.server",
+            "data": {
+              "categories": [1, 2],
+              "numberOfPeople": 10,
+              "delayMinutes": 5,
+              "longitude": 127.3840564806,
+              "latitude": 36.4327617237
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

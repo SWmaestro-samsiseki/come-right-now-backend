@@ -4,6 +4,7 @@ import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { AccountService } from './account.service';
 import { getAccount } from './get-account.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { Account } from './account.entity';
 
 @ApiTags('account')
 @Controller('account')
@@ -17,7 +18,7 @@ export class AccountController {
 
   @Get('/validation')
   @UseGuards(AuthGuard())
-  checkValidation(@getAccount() account) {
+  checkValidation(@getAccount() account: Account) {
     return { statusCode: 200, userType: account.userType };
   }
 }

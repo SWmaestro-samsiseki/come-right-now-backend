@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserType } from 'src/enum/user-type.enum';
 import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity()
@@ -16,7 +17,7 @@ export class Account extends BaseEntity {
   @ApiProperty()
   public password: string;
 
-  @Column({ type: 'varchar', length: 6, default: 'USER' })
+  @Column({ type: 'enum', enum: UserType, default: UserType.USER })
   @ApiProperty()
-  public userType: string;
+  public userType: UserType;
 }

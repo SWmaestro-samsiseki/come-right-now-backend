@@ -15,16 +15,16 @@ export class DateUtilService {
 
   getDayOfWeekToday(): DayOfWeek {
     const today = new Date();
-    const dayOfWeekToday = this.dayOfWeeks[today.getDay()];
+    const todayDayOfWeek = this.dayOfWeeks[today.getDay()];
 
-    return DayOfWeek[dayOfWeekToday];
+    return DayOfWeek[todayDayOfWeek];
   }
 
   getNowDate() {
     return new Date();
   }
 
-  addMinute(minuteArray: number[], date: Date) {
+  addMinute(minuteArray: number[], date: Date): Date {
     for (const minute of minuteArray) {
       if (minute >= 1) {
         date.setMinutes(date.getMinutes() + minute);
@@ -34,20 +34,18 @@ export class DateUtilService {
     return date;
   }
 
-  addHour(hour: number, date: Date) {
+  addHour(hour: number, date: Date): Date {
     date.setHours(date.getHours() + hour);
     return date;
   }
 
-  async getEstimatedTime(
+  async getPathTotalTimeFromTmap(
     userLatitude: number,
     userLongitude: number,
     storeLatitude: number,
     storeLongitude: number,
-    delayMinutes: number,
-  ): Promise<Date> {
-    let nowDate = new Date();
-    const ob = this.httpService.post(
+  ) {
+    const observableObject = this.httpService.post(
       'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function',
       {
         startX: userLongitude,
@@ -66,10 +64,30 @@ export class DateUtilService {
         },
       },
     );
+    const response = await firstValueFrom(observableObject);
+    const path = response.data.features[0].properties;
+    const totalTime: number = Math.floor(path.totalTime / 60);
 
-    const result = await firstValueFrom(ob);
-    const totalTime: number = Math.floor(result.data.features[0].properties.totalTime / 60);
-    nowDate = this.addMinute([delayMinutes, totalTime], nowDate);
-    return nowDate;
+    return totalTime;
+  }
+
+  async getEstimatedTime(
+    userLatitude: number,
+    userLongitude: number,
+    storeLatitude: number,
+    storeLongitude: number,
+    delayMinutes: number,
+  ): Promise<Date> {
+    const totalTime = await this.getPathTotalTimeFromTmap(
+      userLatitude,
+      userLongitude,
+      storeLatitude,
+      storeLongitude,
+    );
+
+    const nowDateTime = this.getNowDate();
+    const estimatedTime = this.addMinute([delayMinutes, totalTime], nowDateTime);
+
+    return estimatedTime;
   }
 }

@@ -4,6 +4,7 @@ import { BusinessHour } from 'src/business-hour/business-hour.entity';
 import { Category } from 'src/category/category.entity';
 import { Reservation } from 'src/reservation/reservation.entity';
 import { StoreTable } from 'src/store-table/store-table.entity';
+import { TimeDeal } from 'src/time-deal/time-deal.entity';
 import {
   Entity,
   BaseEntity,
@@ -104,6 +105,9 @@ export class Store extends BaseEntity {
   @ManyToMany(() => Category, { createForeignKeyConstraints: false })
   @JoinTable({ name: 'store_category' })
   categories: Category[];
+
+  @OneToMany(() => TimeDeal, (timeDeal) => timeDeal.store)
+  public timeDeals: TimeDeal[];
 
   public account: Account;
 }

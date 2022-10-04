@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { DateUtilService } from 'src/date-util/date-util.service';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { Store } from './store.entity';
 
@@ -42,12 +42,46 @@ export class StoreService {
     return kmDistance * 1000;
   }
 
+  async getStoreWithTimeDeal(): Promise<Store[]> {
+    const stores = await this.storeRepository.find({
+      relations: ['timeDeals'],
+      where: {
+        timeDeals: Not(IsNull()),
+      },
+    });
+
+    if (stores.length === 0) {
+      throw new NotFoundException('no store with time deal');
+    }
+
+    return stores;
+  }
+
+  findNearStores(
+    latitude: number,
+    longitude: number,
+    startMeter: number,
+    endMeter: number,
+    stores: Store[],
+  ): Store[] {
+    const resultStores = stores.filter((store) => {
+      const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
+      if (startMeter <= d && d <= endMeter) {
+        return true;
+      }
+      return false;
+    });
+
+    return resultStores;
+  }
+
   //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
   async findCandidateStores(
     longitude: number,
     latitude: number,
     categories: number[],
-    distance: number,
+    startMeter: number,
+    endMeter: number,
   ): Promise<Store[]> {
     const whereOptions = [];
     for (const category of categories) {
@@ -64,7 +98,7 @@ export class StoreService {
     //원하는 카테고리를 가진 stores
     const filteredStores = totalStores.filter((store) => {
       const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (d <= distance) {
+      if (startMeter <= d && d <= endMeter) {
         return true;
       }
       return false;
@@ -106,9 +140,8 @@ export class StoreService {
     }
 
     const { businessHours } = store;
-    const todayBusinessHours = businessHours.filter(
-      (bh) => bh.businessDay === this.dateUtilService.getDayOfWeekToday(),
-    )[0];
+    const dayOfWeekToday = this.dateUtilService.getDayOfWeekToday();
+    const todayBusinessHours = businessHours.filter((bh) => bh.businessDay === dayOfWeekToday)[0];
 
     const storeForPublicDTO: StoreForPublicDTO = {
       ...store,

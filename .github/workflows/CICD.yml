@@ -1,10 +1,8 @@
 name: come right now CICD
 
 on:
-  push:
-    branches: ['main']
   pull_request:
-    branches: ['main']
+    branches: ['develop']
 
 jobs:
   test:
@@ -60,6 +58,7 @@ jobs:
           echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .development.env
           echo TMAP_API_KEY=${{ secrets.TMAP_API_KEY }} >> .development.env
           echo TZ=${{ secrets.TZ }} >> .development.env
+          echo REDIS_ENDPOINT=${{ secrets.REDIS_ENDPOINT }} >> .development.env
           cat .development.env
       - name: build server files
         working-directory: ./
