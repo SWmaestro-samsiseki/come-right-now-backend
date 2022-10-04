@@ -115,23 +115,23 @@ export class TimeDealService {
     longitude: number,
     latitude: number,
   ): Promise<UserTimeDealsDTO> {
-    const timeDeals = await this.timeDealManager.query(
+    const timeDeals: UserTimeDealsDTO = await this.timeDealManager.query(
       `
       SELECT t.id,
              t.benefit,
-             t.endtime,
-             s.businessname,
-             s.storeimage,
+             t.endTime,
+             s.businessName,
+             s.storeImage,
              s.latitude,
              s.longitude,
              Round(St_distance_sphere(Point(?, ?),
                         Point(s.longitude, s.latitude))) AS distance
       FROM  time_deal t
             LEFT JOIN store s
-                    ON t.storeid = s.id
+                    ON t.storeId = s.id
             LEFT JOIN participant p
                     ON t.id = p.timedealid
-      WHERE p.userid = ?
+      WHERE p.userId = ?
             AND p.status = ?
       `,
       [longitude, latitude, userId, ParticipantStatus.REQUESTED],
