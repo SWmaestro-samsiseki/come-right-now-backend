@@ -14,7 +14,6 @@ import { ReservationService } from 'src/reservation/reservation.service';
 import { CreateReservationDTO } from 'src/reservation/dto/create-reservation.dto';
 import { ReservationStatus } from 'src/enum/reservation-status.enum';
 import { WebsocketLogger } from 'src/logger/logger.service';
-import { Store } from 'src/store/store.entity';
 import { Inject, UseInterceptors } from '@nestjs/common';
 import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
 import { FindStoreDTO } from './dto/find-store.dto';

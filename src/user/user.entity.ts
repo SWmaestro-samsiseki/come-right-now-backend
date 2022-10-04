@@ -10,7 +10,6 @@ import {
   PrimaryColumn,
   OneToOne,
   JoinColumn,
-  ManyToOne,
 } from 'typeorm';
 
 @Entity()
