@@ -10,7 +10,6 @@ import {
   PrimaryColumn,
   OneToOne,
   JoinColumn,
-  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -37,11 +36,20 @@ export class User extends BaseEntity {
   @ApiProperty()
   public creditRate: number;
 
+  @ApiProperty({
+    type: [Reservation],
+  })
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   public reservations: Reservation[];
 
+  @ApiProperty({
+    type: [Participant],
+  })
   @OneToMany(() => Participant, (participant) => participant.user)
   public participants: Participant[];
 
+  @ApiProperty({
+    type: Account,
+  })
   public account: Account;
 }
