@@ -88,8 +88,8 @@ export class ReservationService {
       .leftJoin('r.user', 'u')
       .leftJoin('s.businessHours', 'b')
       .where('u.id = :id AND r.reservationStatus = :status', {
-        status: reservationStatus,
         id: userId,
+        status: reservationStatus,
       })
       .getOne();
 

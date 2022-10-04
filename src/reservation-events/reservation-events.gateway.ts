@@ -8,7 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AccountService } from 'src/account/account.service';
-import { userFindStoreServerDTO } from './dto/user-find-store-server.dto';
 import { StoreService } from 'src/store/store.service';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { ReservationService } from 'src/reservation/reservation.service';
@@ -18,6 +17,7 @@ import { WebsocketLogger } from 'src/logger/logger.service';
 import { Store } from 'src/store/store.entity';
 import { Inject, UseInterceptors } from '@nestjs/common';
 import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
+import { FindStoreDTO } from './dto/find-store.dto';
 
 @WebSocketGateway({
   cors: {
@@ -43,24 +43,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   private emitSocketEvent(socket: Socket, targetSocketId: string, eventName: string, data: any) {
     socket.to(targetSocketId).emit(eventName, data);
     this.websocketLogger.websocketEventLog(eventName, true, true);
-  }
-
-  private async findStoreWithDistance(
-    startMeter: number,
-    endMeter: number,
-    categories: number[],
-    userLongitude: number,
-    userLatitude: number,
-  ): Promise<Store[]> {
-    const stores = await this.storeService.findCandidateStores(
-      userLongitude,
-      userLatitude,
-      categories,
-      startMeter,
-      endMeter,
-    );
-
-    return stores;
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -111,165 +93,166 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketConnectionLog(true, socket.id, userType);
   }
 
-  @SubscribeMessage('user.find-store.server')
-  async userFindStoreToServer(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
+  async saveSeatCheckRequest(
+    userLatitude,
+    userLongitude,
+    storeLatitude,
+    storeLongitude,
+    delayMinutes,
+    numberOfPeople,
+    userId,
+    storeId,
   ) {
-    this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
-    const userId = socket.data.uuid;
-    const {
-      categories,
-      numberOfPeople,
+    const estimatedTime = await this.dateUtilService.getEstimatedTime(
+      userLatitude,
+      userLongitude,
+      storeLatitude,
+      storeLongitude,
       delayMinutes,
-      longitude,
-      latitude,
-    }: userFindStoreServerDTO = userFindStoreServerDTO;
-    let stores: Store[];
+    );
+    const createReservationDTO: CreateReservationDTO = {
+      numberOfPeople,
+      estimatedTime,
+      userId,
+      delayMinutes,
+      storeId,
+    };
+    const reservationId = await this.reservationService.createReservation(createReservationDTO);
+    return reservationId;
+  }
+
+  // 근처에 주점이 없는 것은 에러가 아님. 로직임. 에러 처리 없이 기존대로 반환
+  // 예상 도착 시간 계산해서 Reservation 테이블에 저장하는 역할 -> saveSeatCheckRequest
+  // TODO: 재탐색 횟수에 따라 탐색 범위 조정
+  @SubscribeMessage('user.find-store.server')
+  async findeStoreEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() findStoreDTO: FindStoreDTO,
+  ) {
     try {
-      stores = await this.findStoreWithDistance(0, 500, categories, longitude, latitude);
-    } catch (e) {
-      this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-      this.websocketLogger.error(e);
-      return {
-        isSuccess: false,
-        message: '주변에 가게가 없습니다.',
-      };
-    }
+      this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
+      const userId = socket.data.uuid;
+      const { categories, numberOfPeople, delayMinutes, longitude, latitude } = findStoreDTO;
 
-    // 2. 주점으로 이벤트 전송
-    let onlineStoreFlag = false;
-    for (const store of stores) {
-      if (!(store.id in this.storeOnlineMap)) {
-        continue;
-      }
+      const stores = await this.storeService.findStoresNearUser(
+        longitude,
+        latitude,
+        categories,
+        0,
+        500,
+      );
 
-      if (!onlineStoreFlag) {
-        onlineStoreFlag = true;
-      }
+      let onlineStoreFlag = false;
 
-      try {
-        const estimatedTime = await this.dateUtilService.getEstimatedTime(
+      for (const store of stores) {
+        if (!(store.id in this.storeOnlineMap)) {
+          continue;
+        }
+
+        if (!onlineStoreFlag) {
+          onlineStoreFlag = true;
+        }
+
+        const reservationId = await this.saveSeatCheckRequest(
           latitude,
           longitude,
           store.latitude,
           store.longitude,
           delayMinutes,
-        );
-        const createReservationDTO: CreateReservationDTO = {
           numberOfPeople,
-          estimatedTime,
           userId,
-          delayMinutes,
-          storeId: store.id,
-        };
-        const reservationId = await this.reservationService.createReservation(createReservationDTO);
+          store.id,
+        );
 
         const storeSocketId = this.storeOnlineMap[store.id];
         this.emitSocketEvent(socket, storeSocketId, 'server.find-store.store', reservationId);
-      } catch (e) {
+      }
+      if (!onlineStoreFlag) {
         this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-        this.websocketLogger.error(e);
+        this.websocketLogger.error('no online store in condition');
         return {
           isSuccess: false,
-          message: '잠시 후에 다시 탐색하세요.',
+          message: '주변에 가게가 없습니다.',
         };
       }
-    }
 
-    if (!onlineStoreFlag) {
+      return {
+        isSuccess: true,
+      };
+    } catch (e) {
       this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-      this.websocketLogger.error('no online store in condition');
+      this.websocketLogger.error(e);
       return {
         isSuccess: false,
-        message: '주변에 가게가 없습니다.',
+        message: '잠시 후에 다시 탐색하세요.',
       };
     }
-
-    return {
-      isSuccess: true,
-    };
   }
 
+  // TODO: 제거 (위의 findeStoreEvent와 통합)
   @SubscribeMessage('user.find-store-further.server')
   async userFindStoreToServerFurther(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() userFindStoreServerDTO: userFindStoreServerDTO,
+    @MessageBody() findStoreDTO: FindStoreDTO,
   ) {
-    this.websocketLogger.websocketEventLog('user.find-store-further.server', false, true);
-    const userId = socket.data.uuid;
-    const {
-      categories,
-      numberOfPeople,
-      delayMinutes,
-      longitude,
-      latitude,
-    }: userFindStoreServerDTO = userFindStoreServerDTO;
-
-    let stores: Store[];
     try {
-      stores = await this.findStoreWithDistance(500, 1000, categories, longitude, latitude);
-    } catch (e) {
-      this.websocketLogger.websocketEventLog('server.find-store-further.store', true, false);
-      this.websocketLogger.error(e);
-      return {
-        isSuccess: false,
-        message: '주변에 가게가 없습니다.',
-      };
-    }
+      this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
+      const userId = socket.data.uuid;
+      const { categories, numberOfPeople, delayMinutes, longitude, latitude } = findStoreDTO;
 
-    // 2. 주점으로 이벤트 전송
-    let onlineStoreFlag = false;
-    for (const store of stores) {
-      if (!(store.id in this.storeOnlineMap)) {
-        continue;
-      }
+      const stores = await this.storeService.findStoresNearUser(
+        longitude,
+        latitude,
+        categories,
+        0,
+        500,
+      );
 
-      if (!onlineStoreFlag) {
-        onlineStoreFlag = true;
-      }
+      let onlineStoreFlag = false;
 
-      try {
-        const estimatedTime = await this.dateUtilService.getEstimatedTime(
+      for (const store of stores) {
+        if (!(store.id in this.storeOnlineMap)) {
+          continue;
+        }
+
+        if (!onlineStoreFlag) {
+          onlineStoreFlag = true;
+        }
+
+        const reservationId = await this.saveSeatCheckRequest(
           latitude,
           longitude,
           store.latitude,
           store.longitude,
           delayMinutes,
-        );
-        const createReservationDTO: CreateReservationDTO = {
           numberOfPeople,
-          estimatedTime,
           userId,
-          delayMinutes,
-          storeId: store.id,
-        };
-        const reservationId = await this.reservationService.createReservation(createReservationDTO);
+          store.id,
+        );
 
         const storeSocketId = this.storeOnlineMap[store.id];
         this.emitSocketEvent(socket, storeSocketId, 'server.find-store.store', reservationId);
-      } catch (e) {
+      }
+      if (!onlineStoreFlag) {
         this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-        this.websocketLogger.error(e);
+        this.websocketLogger.error('no online store in condition');
         return {
           isSuccess: false,
-          message: '잠시 후에 다시 탐색하세요.',
+          message: '주변에 가게가 없습니다.',
         };
       }
-    }
 
-    if (!onlineStoreFlag) {
+      return {
+        isSuccess: true,
+      };
+    } catch (e) {
       this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-      this.websocketLogger.error('no online store in condition');
+      this.websocketLogger.error(e);
       return {
         isSuccess: false,
-        message: '주변에 가게가 없습니다.',
+        message: '잠시 후에 다시 탐색하세요.',
       };
     }
-
-    return {
-      isSuccess: true,
-    };
   }
 
   @SubscribeMessage('store.accept-seat.server')

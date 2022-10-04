@@ -1,4 +1,4 @@
-export class userFindStoreServerDTO {
+export class FindStoreDTO {
   categories: number[];
 
   numberOfPeople: number;

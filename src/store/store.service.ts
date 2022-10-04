@@ -76,7 +76,7 @@ export class StoreService {
   }
 
   //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
-  async findCandidateStores(
+  async findStoresNearUser(
     longitude: number,
     latitude: number,
     categories: number[],
@@ -104,9 +104,6 @@ export class StoreService {
       return false;
     }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
 
-    if (filteredStores.length === 0) {
-      throw new NotFoundException('no store in condition');
-    }
     return filteredStores;
   }
 
