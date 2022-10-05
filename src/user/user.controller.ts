@@ -1,6 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
+import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
 import { UserInfoDTO } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -12,8 +13,8 @@ export class UserController {
 
   @Get('/my-info')
   @UseGuards(AuthGuard())
-  getUserInfo(@getAccount() account): Promise<UserInfoDTO> {
+  async getUserInfo(@getAccount() account: Account): Promise<UserInfoDTO> {
     const { id } = account;
-    return this.userService.getUserInfo(id);
+    return await this.userService.getUserInfo(id);
   }
 }

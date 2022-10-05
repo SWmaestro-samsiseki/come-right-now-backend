@@ -2,20 +2,19 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-
 import * as morgan from 'morgan';
 import { UserInfoDTO } from './user/dto/user.dto';
-import { User } from './user/user.entity';
-import { Reservation } from './reservation/reservation.entity';
-import { StoreTable } from './store-table/store-table.entity';
-import { Store } from './store/store.entity';
-import { Category } from './category/category.entity';
-import { BusinessHour } from './business-hour/business-hour.entity';
-import { Account } from './account/account.entity';
-import { LoginOutputDTO } from './account/dto/account.dto';
 import { WebsocketLogger } from './logger/logger.service';
 import { NewrelicInterceptor } from './newrelic/newrelic.interceptor';
 import { RedisIoAdapter } from './redis.adapter';
+import { UserTimeDealsDTO } from './time-deal/dto/user-time-deals.dto';
+import { TimeDeal } from './time-deal/time-deal.entity';
+import { Participant } from './participant/participant.entity';
+import { StoreForPublicDTO } from './store/dto/store-for-public.dto';
+import { ReservationDTO } from './reservation/dto/reservation.dto';
+import { CreateParticipantOutputDTO } from './participant/dto/create-participant.output.dto';
+import { Category } from './category/category.entity';
+import { LoginOutputDTO } from './account/dto/account.dto';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -48,15 +47,15 @@ async function initServer(port: number) {
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [
-      LoginOutputDTO,
-      Account,
-      User,
       UserInfoDTO,
-      StoreTable,
-      Store,
-      Reservation,
+      UserTimeDealsDTO,
+      TimeDeal,
+      Participant,
+      StoreForPublicDTO,
+      ReservationDTO,
+      CreateParticipantOutputDTO,
       Category,
-      BusinessHour,
+      LoginOutputDTO,
     ],
   });
   SwaggerModule.setup('api', app, document);

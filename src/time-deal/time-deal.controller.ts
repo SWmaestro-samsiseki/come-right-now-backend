@@ -13,6 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
 import { UserTimeDealsDTO } from './dto/user-time-deals.dto';
+import { TimeDeal } from './time-deal.entity';
 import { TimeDealService } from './time-deal.service';
 
 @Controller('time-deal')
@@ -21,7 +22,7 @@ export class TimeDealController {
   constructor(private readonly timeDealService: TimeDealService) {}
 
   @Get('store')
-  async getStoreTimeDeal(@Query('storeId') storeId: string) {
+  async getStoreTimeDeal(@Query('storeId') storeId: string): Promise<TimeDeal> {
     await this.timeDealService.checkTimeDealValidation();
     return await this.timeDealService.getStoreTimeDeal(storeId);
   }
@@ -30,7 +31,7 @@ export class TimeDealController {
   async getUserTimeDeals(
     @Query('latitude') userLatitude: number,
     @Query('longitude') userLongitude: number,
-  ) {
+  ): Promise<TimeDeal[]> {
     await this.timeDealService.checkTimeDealValidation();
     return await this.timeDealService.getUserTimeDeals(userLatitude, userLongitude);
   }
@@ -38,7 +39,7 @@ export class TimeDealController {
   @Post()
   @UseGuards(AuthGuard())
   async createTimeDeal(
-    @Request() req,
+    @Request() req: any,
     @Body('duration') duration: number,
     @Body('benefit') benefits: string,
   ) {
