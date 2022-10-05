@@ -15,6 +15,7 @@ import { LoggerModule } from './logger/logger.module';
 import { NewrelicModule } from './newrelic/newrelic.module';
 import { TimeDealModule } from './time-deal/time-deal.module';
 import { ParticipantModule } from './participant/participant.module';
+import { TMapModule } from './t-map/t-map.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ParticipantModule } from './participant/participant.module';
     NewrelicModule,
     TimeDealModule,
     ParticipantModule,
+    TMapModule,
   ],
   controllers: [AppController],
   providers: [AppService],
