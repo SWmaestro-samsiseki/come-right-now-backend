@@ -36,7 +36,7 @@ export class TimeDealService {
     return timeDeal;
   }
 
-  async getUserTimeDeals(latitude: number, longitude: number) {
+  async getUserTimeDeals(latitude: number, longitude: number): Promise<TimeDeal[]> {
     const stores = await this.storeService.getStoreWithTimeDeal();
     const nearStores = this.storeService.findNearStores(latitude, longitude, 0, 500, stores);
     const whereOptions = [];

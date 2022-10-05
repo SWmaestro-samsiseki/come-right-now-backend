@@ -16,16 +16,22 @@ export class ReservationDTO {
   @ApiProperty()
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    enum: ReservationStatus,
+  })
   reservationStatus: ReservationStatus;
 
   @ApiProperty()
   delayCount: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: User,
+  })
   user: User;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: StoreForPublicDTO,
+  })
   store: StoreForPublicDTO;
 
   @ApiProperty()
