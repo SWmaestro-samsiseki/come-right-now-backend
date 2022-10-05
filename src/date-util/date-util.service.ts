@@ -1,11 +1,10 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { DayOfWeek } from 'src/enum/days-of-week.enum';
+import { TMapService } from 'src/t-map/t-map.service';
 
 @Injectable()
 export class DateUtilService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly tmapService: TMapService) {}
 
   parseDate(target: string): Date {
     return new Date(target);
@@ -45,27 +44,12 @@ export class DateUtilService {
     storeLatitude: number,
     storeLongitude: number,
   ) {
-    const observableObject = this.httpService.post(
-      'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function',
-      {
-        startX: userLongitude,
-        startY: userLatitude,
-        speed: 4,
-        endX: storeLongitude,
-        endY: storeLatitude,
-        startName: 'user',
-        endName: 'store',
-      },
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          appKey: process.env.TMAP_API_KEY,
-        },
-      },
+    const path = await this.tmapService.getPathFromTmap(
+      userLatitude,
+      userLongitude,
+      storeLatitude,
+      storeLongitude,
     );
-    const response = await firstValueFrom(observableObject);
-    const path = response.data.features[0].properties;
     const totalTime: number = Math.floor(path.totalTime / 60);
 
     return totalTime;
