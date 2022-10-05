@@ -35,7 +35,7 @@ export class StoreController {
   ) {
     const store = await this.storeService.getStoreById(id);
 
-    const distance = await this.storeService.getDistanceMeterByTmap(
+    const distance = await this.storeService.getDistanceMeterFromTmap(
       userLatitude,
       userLongitude,
       store.latitude,
