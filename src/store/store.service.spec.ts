@@ -1,8 +1,8 @@
-import { HttpService } from '@nestjs/axios';
 import { NotFoundException } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
+import { TMapService } from 'src/t-map/t-map.service';
 import { MockType } from 'test/test.type';
 import { Repository } from 'typeorm';
 import { Store } from './store.entity';
@@ -11,14 +11,14 @@ import { StoreService } from './store.service';
 describe('storeService', () => {
   let storeService: StoreService;
   let dateUtilService: MockType<DateUtilService>;
-  let httpService: MockType<HttpService>;
+  let tmapService: MockType<TMapService>;
   let storeRepository: MockType<Repository<Store>>;
 
   const mockDateUtilServiceFactory: () => MockType<DateUtilService> = jest.fn(() => ({
     getDayOfWeekToday: jest.fn(),
   }));
-  const mockHttpServiceFactory: () => MockType<HttpService> = jest.fn(() => ({
-    post: jest.fn(),
+  const mockTMapServiceFactory: () => MockType<TMapService> = jest.fn(() => ({
+    getPathFromTmap: jest.fn(),
   }));
   const mockRepositoryFactory: () => MockType<Repository<Store>> = jest.fn(() => ({
     createQueryBuilder: jest.fn(),
@@ -37,8 +37,8 @@ describe('storeService', () => {
           useFactory: mockDateUtilServiceFactory,
         },
         {
-          provide: HttpService,
-          useFactory: mockHttpServiceFactory,
+          provide: TMapService,
+          useFactory: mockTMapServiceFactory,
         },
         {
           provide: getRepositoryToken(Store),
@@ -49,7 +49,7 @@ describe('storeService', () => {
 
     storeService = module.get<StoreService>(StoreService);
     dateUtilService = module.get(DateUtilService);
-    httpService = module.get(HttpService);
+    tmapService = module.get(TMapService);
     storeRepository = module.get(getRepositoryToken(Store));
   });
 
