@@ -92,7 +92,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketConnectionLog(true, socket.id, userType);
   }
 
-  async saveSeatCheckRequest(
+  private async saveSeatCheckRequest(
     userLatitude,
     userLongitude,
     storeLatitude,
@@ -120,7 +120,7 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     return reservationId;
   }
 
-  // 근처에 주점이 없는 것은 에러가 아님. 로직임. 에러 처리 없이 기존대로 반환
+  // finsStoresNearUser: 근처에 주점이 없는 것은 에러가 아님. 로직임. 에러 처리 없이 기존대로 반환(반환값 변화없음)
   // 예상 도착 시간 계산해서 Reservation 테이블에 저장하는 역할 -> saveSeatCheckRequest
   // TODO: 재탐색 횟수에 따라 탐색 범위 조정
   @SubscribeMessage('user.find-store.server')
@@ -189,70 +189,70 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   }
 
   // TODO: 제거 (위의 findeStoreEvent와 통합)
-  @SubscribeMessage('user.find-store-further.server')
-  async userFindStoreToServerFurther(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() findStoreDTO: FindStoreDTO,
-  ) {
-    try {
-      this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
-      const userId = socket.data.uuid;
-      const { categories, numberOfPeople, delayMinutes, longitude, latitude } = findStoreDTO;
+  // @SubscribeMessage('user.find-store-further.server')
+  // async userFindStoreToServerFurther(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() findStoreDTO: FindStoreDTO,
+  // ) {
+  //   try {
+  //     this.websocketLogger.websocketEventLog('user.find-store.server', false, true);
+  //     const userId = socket.data.uuid;
+  //     const { categories, numberOfPeople, delayMinutes, longitude, latitude } = findStoreDTO;
 
-      const stores = await this.storeService.findStoresNearUser(
-        longitude,
-        latitude,
-        categories,
-        0,
-        500,
-      );
+  //     const stores = await this.storeService.findStoresNearUser(
+  //       longitude,
+  //       latitude,
+  //       categories,
+  //       0,
+  //       500,
+  //     );
 
-      let onlineStoreFlag = false;
+  //     let onlineStoreFlag = false;
 
-      for (const store of stores) {
-        if (!(store.id in this.storeOnlineMap)) {
-          continue;
-        }
+  //     for (const store of stores) {
+  //       if (!(store.id in this.storeOnlineMap)) {
+  //         continue;
+  //       }
 
-        if (!onlineStoreFlag) {
-          onlineStoreFlag = true;
-        }
+  //       if (!onlineStoreFlag) {
+  //         onlineStoreFlag = true;
+  //       }
 
-        const reservationId = await this.saveSeatCheckRequest(
-          latitude,
-          longitude,
-          store.latitude,
-          store.longitude,
-          delayMinutes,
-          numberOfPeople,
-          userId,
-          store.id,
-        );
+  //       const reservationId = await this.saveSeatCheckRequest(
+  //         latitude,
+  //         longitude,
+  //         store.latitude,
+  //         store.longitude,
+  //         delayMinutes,
+  //         numberOfPeople,
+  //         userId,
+  //         store.id,
+  //       );
 
-        const storeSocketId = this.storeOnlineMap[store.id];
-        this.emitSocketEvent(socket, storeSocketId, 'server.find-store.store', reservationId);
-      }
-      if (!onlineStoreFlag) {
-        this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-        this.websocketLogger.error('no online store in condition');
-        return {
-          isSuccess: false,
-          message: '주변에 가게가 없습니다.',
-        };
-      }
+  //       const storeSocketId = this.storeOnlineMap[store.id];
+  //       this.emitSocketEvent(socket, storeSocketId, 'server.find-store.store', reservationId);
+  //     }
+  //     if (!onlineStoreFlag) {
+  //       this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+  //       this.websocketLogger.error('no online store in condition');
+  //       return {
+  //         isSuccess: false,
+  //         message: '주변에 가게가 없습니다.',
+  //       };
+  //     }
 
-      return {
-        isSuccess: true,
-      };
-    } catch (e) {
-      this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
-      this.websocketLogger.error(e);
-      return {
-        isSuccess: false,
-        message: '잠시 후에 다시 탐색하세요.',
-      };
-    }
-  }
+  //     return {
+  //       isSuccess: true,
+  //     };
+  //   } catch (e) {
+  //     this.websocketLogger.websocketEventLog('server.find-store.store', true, false);
+  //     this.websocketLogger.error(e);
+  //     return {
+  //       isSuccess: false,
+  //       message: '잠시 후에 다시 탐색하세요.',
+  //     };
+  //   }
+  // }
 
   @SubscribeMessage('store.accept-seat.server')
   async acceptSeatEvent(
