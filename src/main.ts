@@ -15,6 +15,8 @@ import { ReservationDTO } from './reservation/dto/reservation.dto';
 import { CreateParticipantOutputDTO } from './participant/dto/create-participant.output.dto';
 import { Category } from './category/category.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
+import { ValidationDTO } from './account/dto/validation.dto';
+import { GetDistanceDTO } from './store/dto/get-distance.dto';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -56,6 +58,8 @@ async function initServer(port: number) {
       CreateParticipantOutputDTO,
       Category,
       LoginOutputDTO,
+      ValidationDTO,
+      GetDistanceDTO,
     ],
   });
   SwaggerModule.setup('api', app, document);
