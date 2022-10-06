@@ -36,4 +36,7 @@ export class ReservationDTO {
 
   @ApiProperty()
   departureTime: Date;
+
+  @ApiProperty()
+  arrivalTime: Date;
 }
