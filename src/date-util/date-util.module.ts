@@ -1,9 +1,9 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { TMapModule } from 'src/t-map/t-map.module';
 import { DateUtilService } from './date-util.service';
 
 @Module({
-  imports: [HttpModule],
+  imports: [TMapModule],
   providers: [DateUtilService],
   exports: [DateUtilService],
 })

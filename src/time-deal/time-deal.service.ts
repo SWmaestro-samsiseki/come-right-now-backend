@@ -36,9 +36,10 @@ export class TimeDealService {
     return timeDeal;
   }
 
+  // 성능 측정
   async getUserTimeDeals(latitude: number, longitude: number): Promise<TimeDeal[]> {
     const stores = await this.storeService.getStoreWithTimeDeal();
-    const nearStores = this.storeService.findNearStores(latitude, longitude, 0, 500, stores);
+    const nearStores = this.storeService.filterNearStores(latitude, longitude, 0, 500, stores);
     const whereOptions = [];
     for (const nearStore of nearStores) {
       whereOptions.push({

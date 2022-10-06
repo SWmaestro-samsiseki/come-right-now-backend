@@ -1,8 +1,7 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { firstValueFrom } from 'rxjs';
 import { DateUtilService } from 'src/date-util/date-util.service';
+import { TMapService } from 'src/t-map/t-map.service';
 import { IsNull, Not, Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { Store } from './store.entity';
@@ -12,33 +11,34 @@ export class StoreService {
   constructor(
     @InjectRepository(Store) private storeRepository: Repository<Store>,
     private readonly dateUtilService: DateUtilService,
-    private readonly httpService: HttpService,
+    private readonly tmapService: TMapService,
   ) {}
 
   // 각도를 라디안으로 변환
-  private degreeToRadian(degree: number): number {
+  private convertDegreeToRadian(degree: number): number {
     return degree * (Math.PI / 180);
   }
 
   //두 지점 사이의 거리 계산 (직선거리)
   //meter 단위로 반환
+  // TODO: query 계산으로 변경
   private getDistance(
     latitude1: number,
     longitude1: number,
     latitude2: number,
     longitude2: number,
   ): number {
-    const R = 6371; // Radius of the earth in km
-    const dLat = this.degreeToRadian(latitude2 - latitude1);
-    const dLon = this.degreeToRadian(longitude2 - longitude1);
+    const radius = 6371; // Radius of the earth in km
+    const latitudeRadian = this.convertDegreeToRadian(latitude2 - latitude1) / 2;
+    const longigudeRadian = this.convertDegreeToRadian(longitude2 - longitude1) / 2;
     const temp1 =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.degreeToRadian(latitude1)) *
-        Math.cos(this.degreeToRadian(latitude2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.sin(latitudeRadian) * Math.sin(latitudeRadian) +
+      Math.cos(this.convertDegreeToRadian(latitude1)) *
+        Math.cos(this.convertDegreeToRadian(latitude2)) *
+        Math.sin(longigudeRadian) *
+        Math.sin(longigudeRadian);
     const temp2 = 2 * Math.atan2(Math.sqrt(temp1), Math.sqrt(1 - temp1));
-    const kmDistance = R * temp2;
+    const kmDistance = radius * temp2;
     return kmDistance * 1000;
   }
 
@@ -57,7 +57,7 @@ export class StoreService {
     return stores;
   }
 
-  findNearStores(
+  filterNearStores(
     latitude: number,
     longitude: number,
     startMeter: number,
@@ -65,8 +65,8 @@ export class StoreService {
     stores: Store[],
   ): Store[] {
     const resultStores = stores.filter((store) => {
-      const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (startMeter <= d && d <= endMeter) {
+      const distance = this.getDistance(latitude, longitude, store.latitude, store.longitude);
+      if (startMeter <= distance && distance <= endMeter) {
         return true;
       }
       return false;
@@ -76,7 +76,7 @@ export class StoreService {
   }
 
   //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
-  async findCandidateStores(
+  async findStoresNearUser(
     longitude: number,
     latitude: number,
     categories: number[],
@@ -97,16 +97,13 @@ export class StoreService {
     });
     //원하는 카테고리를 가진 stores
     const filteredStores = totalStores.filter((store) => {
-      const d = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (startMeter <= d && d <= endMeter) {
+      const distance = this.getDistance(latitude, longitude, store.latitude, store.longitude);
+      if (startMeter <= distance && distance <= endMeter) {
         return true;
       }
       return false;
     }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
 
-    if (filteredStores.length === 0) {
-      throw new NotFoundException('no store in condition');
-    }
     return filteredStores;
   }
 
@@ -168,35 +165,19 @@ export class StoreService {
     return store;
   }
 
-  async getDistanceMeterByTmap(
+  async getDistanceMeterFromTmap(
     latitude1: number,
     longitude1: number,
     latitude2: number,
     longitude2: number,
   ) {
-    const ob = this.httpService.post(
-      'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function',
-      {
-        startX: longitude1,
-        startY: latitude1,
-        speed: 4,
-        endX: longitude2,
-        endY: latitude2,
-        startName: 'user',
-        endName: 'store',
-      },
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          appKey: process.env.TMAP_API_KEY,
-        },
-      },
+    const path = await this.tmapService.getPathFromTmap(
+      latitude1,
+      longitude1,
+      latitude2,
+      longitude2,
     );
-
-    const result = await firstValueFrom(ob);
-
-    const distance = result.data.features[0].properties.totalDistance as number;
+    const distance = path.totalDistance as number;
 
     return distance;
   }

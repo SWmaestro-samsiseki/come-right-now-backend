@@ -9,7 +9,7 @@ export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Get('user/:id')
-  async getUserReserved(
+  async getReservationByUserId(
     @Query('status') status: string,
     @Param('id') userId: string,
   ): Promise<ReservationDTO> {
