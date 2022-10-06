@@ -11,11 +11,20 @@ export class ReservationController {
   @Get('user/:id')
   async getReservationByUserId(
     @Query('status') status: string,
+    @Query('order') order: string | undefined,
     @Param('id') userId: string,
-  ): Promise<ReservationDTO> {
-    const reservation = await this.reservationService.getReservationByUserId(status, userId);
+  ): Promise<ReservationDTO[] | ReservationDTO[][]> {
+    if (order === 'date') {
+      const reservations = await this.reservationService.getReservationByUserIdByDateOrder(
+        status,
+        userId,
+      );
 
-    return reservation;
+      return reservations;
+    }
+    const reservations = await this.reservationService.getReservationsByUserId(status, userId);
+
+    return reservations;
   }
 
   @Get('store/:id')

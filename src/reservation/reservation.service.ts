@@ -43,12 +43,71 @@ export class ReservationService {
         [reservation.delayMinutes],
         reservation.createdAt,
       ),
+      arrivalTime: reservation.arrivalTime,
     };
 
     return result;
   }
 
-  async getReservationByUserId(status: string, userId: string) {
+  async getReservationsByUserId(
+    status: string,
+    userId: string,
+    orderby = 'default',
+  ): Promise<ReservationDTO[]> {
+    if (orderby === 'date') {
+      const reservationStatus = ReservationStatus[status.toUpperCase()];
+
+      const reservations = await this.reservationRepository
+        .createQueryBuilder('r')
+        .select([
+          'r.id',
+          'r.numberOfPeople',
+          'r.estimatedTime',
+          'r.createdAt',
+          'r.reservationStatus',
+          'r.delayMinutes',
+          'r.arrivalTime',
+          'u.id',
+          'u.name',
+          'u.phone',
+          'u.birthDate',
+          'u.creditRate',
+          's.id',
+          's.businessName',
+          's.storeType',
+          's.latitude',
+          's.longitude',
+          's.storePhone',
+          's.introduce',
+          's.storeImage',
+          's.mainMenu1',
+          's.mainMenu2',
+          's.mainMenu3',
+          's.menuImage',
+          's.starRate',
+          's.address',
+          'b.id',
+          'b.businessDay',
+          'b.openAt',
+          'b.closeAt',
+        ])
+        .leftJoin('r.store', 's')
+        .leftJoin('r.user', 'u')
+        .leftJoin('s.businessHours', 'b')
+        .where('u.id = :id AND r.reservationStatus = :status', {
+          id: userId,
+          status: reservationStatus,
+        })
+        .orderBy('r.arrivalTime', 'DESC')
+        .getMany();
+
+      if (reservations.length === 0) {
+        throw new NotFoundException('no reservation');
+      }
+      console.log(reservations);
+      const result = reservations.map((r) => this.filterPrivateReservationData(r));
+      return result;
+    }
     const reservationStatus = ReservationStatus[status.toUpperCase()];
 
     const reservation = await this.reservationRepository
@@ -98,7 +157,7 @@ export class ReservationService {
     }
 
     const result: ReservationDTO = this.filterPrivateReservationData(reservation);
-    return result;
+    return [result];
   }
 
   async getStoreReservationByStatus(status: string, storeId: string): Promise<ReservationDTO[]> {
@@ -274,5 +333,28 @@ export class ReservationService {
     if (result.affected === 0) {
       throw new NotFoundException('해당 예약 건이 존재하지 않습니다.');
     }
+  }
+
+  async getReservationByUserIdByDateOrder(
+    status: string,
+    userId: string,
+  ): Promise<ReservationDTO[][]> {
+    const reservations = await this.getReservationsByUserId(status, userId, 'date');
+    const result = [];
+    for (const reservation of reservations) {
+      const arrivalTime = reservation.arrivalTime;
+      if (result.length !== 0) {
+        const lastReservationArrivalTime = result[result.length - 1][0].arrivalTime;
+        if (
+          this.dateUtilService.compareDateAndMonthAndYear(arrivalTime, lastReservationArrivalTime)
+        ) {
+          result[result.length - 1].push(reservation);
+          continue;
+        }
+      }
+      result.push([reservation]);
+    }
+
+    return result;
   }
 }

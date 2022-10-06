@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Category } from './category.entity';
 import { CategoryService } from './category.service';
 
@@ -9,6 +9,10 @@ import { CategoryService } from './category.service';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  @ApiOkResponse({
+    description: 'Categories',
+    type: [Category],
+  })
   @Get()
   @UseGuards(AuthGuard())
   getAllCategories(): Promise<Category[]> {
