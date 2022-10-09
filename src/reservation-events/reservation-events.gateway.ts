@@ -33,8 +33,8 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     private readonly dateUtilService: DateUtilService,
     private readonly reservationService: ReservationService,
     private readonly websocketLogger: WebsocketLogger,
-    @Inject('STORE_ONLINEMAP') private storeOnlineMap: Record<string, string>,
-    @Inject('USER_ONLINEMAP') private userOnlineMap: Record<string, string>,
+    @Inject('STORE_ONLINEMAP') public storeOnlineMap: Record<string, string>,
+    @Inject('USER_ONLINEMAP') public userOnlineMap: Record<string, string>,
   ) {
     this.websocketLogger.setContext('reservation-events');
   }
@@ -42,6 +42,10 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   private emitSocketEvent(socket: Socket, targetSocketId: string, eventName: string, data: any) {
     socket.to(targetSocketId).emit(eventName, data);
     this.websocketLogger.websocketEventLog(eventName, true, true);
+  }
+
+  public findStoreSocketId(storeId: string): string {
+    return this.storeOnlineMap[storeId];
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {

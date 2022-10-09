@@ -33,7 +33,6 @@ import { NewrelicModule } from 'src/newrelic/newrelic.module';
       useValue: userOnlineMap,
     },
   ],
-  exports: [ReservationEventsGateway],
   controllers: [ReservationEventsController],
 })
 export class ReservationEventsModule {}
