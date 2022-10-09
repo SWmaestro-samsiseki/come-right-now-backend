@@ -17,6 +17,7 @@ import { Category } from './category/category.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
 import { ValidationDTO } from './account/dto/validation.dto';
 import { GetDistanceDTO } from './store/dto/get-distance.dto';
+import { HttpExceptionFilter } from './exception/http-exception.filter';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -33,6 +34,9 @@ async function initServer(port: number) {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  app.useGlobalFilters(new HttpExceptionFilter());
+
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
 
@@ -47,6 +51,7 @@ async function initServer(port: number) {
     .setDescription('지금갈게 API, Entity, DTO 명세서')
     .setVersion('0.2')
     .build();
+
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [
       UserInfoDTO,
@@ -62,6 +67,7 @@ async function initServer(port: number) {
       GetDistanceDTO,
     ],
   });
+
   SwaggerModule.setup('api', app, document);
 
   // #3. 바인딩
