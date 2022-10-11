@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
@@ -20,5 +20,12 @@ export class ParticipantController {
     const userId = account.id;
 
     return await this.participantService.createParticipant(timeDealId, userId);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteParticipantById(@Param('id') id: number) {
+    await this.participantService.deleteParticipantById(id);
+    return;
   }
 }
