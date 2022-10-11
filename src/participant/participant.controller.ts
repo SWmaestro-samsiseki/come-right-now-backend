@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
@@ -47,6 +47,13 @@ export class ParticipantController {
     const userId = account.id;
 
     return await this.participantService.createParticipant(timeDealId, userId);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteParticipantById(@Param('id') id: number) {
+    await this.participantService.deleteParticipantById(id);
+    return;
   }
 
   @Get(':id')

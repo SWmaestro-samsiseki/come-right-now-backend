@@ -51,6 +51,18 @@ export class ParticipantService {
     };
   }
 
+  async deleteParticipantById(id: number) {
+    const participant = await this.participantRepository.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!participant) {
+      throw new NotFoundException();
+    }
+
+    await this.participantRepository.remove(participant);
+  }
   async updateStatusForCheckInTimeDeal(participantId: number) {
     const participantStatus = ParticipantStatus.ARRIVED;
     const result = await this.participantRepository.update(participantId, {
