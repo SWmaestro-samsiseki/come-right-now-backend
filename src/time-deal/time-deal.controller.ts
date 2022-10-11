@@ -106,7 +106,7 @@ export class TimeDealController {
   async getTimeDealsByUserId(
     @getAccount() account: Account,
     @Query() data: { latitude: number; longitude: number },
-  ): Promise<UserTimeDealsDTO> {
+  ): Promise<UserTimeDealsDTO[]> {
     const userId = account.id;
     const { longitude, latitude } = data;
     return await this.timeDealService.getTimeDealsByUserId(userId, longitude, latitude);

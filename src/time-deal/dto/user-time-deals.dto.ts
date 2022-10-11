@@ -30,4 +30,7 @@ export class UserTimeDealsDTO {
 
   @ApiProperty()
   participantId: number;
+
+  @ApiProperty()
+  status: number;
 }

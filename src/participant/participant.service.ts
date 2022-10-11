@@ -61,4 +61,19 @@ export class ParticipantService {
       throw new NotFoundException('해당 타임딜 등록 건이 존재하지 않습니다.');
     }
   }
+
+  async getParticipantById(participantId: number) {
+    const participant = await this.participantRepository.findOne({
+      where: {
+        id: participantId,
+      },
+      relations: ['user', 'timeDeal'],
+    });
+
+    if (!participant) {
+      throw new NotFoundException('타임딜 신청 정보가 없습니다.');
+    }
+
+    return participant;
+  }
 }
