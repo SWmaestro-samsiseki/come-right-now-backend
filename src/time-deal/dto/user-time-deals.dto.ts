@@ -11,6 +11,9 @@ export class UserTimeDealsDTO {
   endTime: Date;
 
   @ApiProperty()
+  storeId: string;
+
+  @ApiProperty()
   businessName: string;
 
   @ApiProperty()
@@ -24,4 +27,10 @@ export class UserTimeDealsDTO {
 
   @ApiProperty()
   distance: number;
+
+  @ApiProperty()
+  participantId: number;
+
+  @ApiProperty()
+  status: number;
 }

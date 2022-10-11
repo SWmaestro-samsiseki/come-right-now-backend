@@ -111,22 +111,26 @@ export class TimeDealService {
     return timeDealId;
   }
 
+  // TODO: select 값 수정
   async getTimeDealsByUserId(
     userId: string,
     longitude: number,
     latitude: number,
-  ): Promise<UserTimeDealsDTO> {
-    const timeDeals: UserTimeDealsDTO = await this.timeDealManager.query(
+  ): Promise<UserTimeDealsDTO[]> {
+    const timeDeals: UserTimeDealsDTO[] = await this.timeDealManager.query(
       `
       SELECT t.id,
              t.benefit,
              t.endTime,
+             s.id AS storeId,
              s.businessName,
              s.storeImage,
              s.latitude,
              s.longitude,
              Round(St_distance_sphere(Point(?, ?),
-                        Point(s.longitude, s.latitude))) AS distance
+                        Point(s.longitude, s.latitude))) AS distance,
+             p.id AS participantId,
+             p.status
       FROM  time_deal t
             LEFT JOIN store s
                     ON t.storeId = s.id
