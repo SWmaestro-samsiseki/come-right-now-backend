@@ -116,8 +116,8 @@ export class TimeDealService {
     userId: string,
     longitude: number,
     latitude: number,
-  ): Promise<UserTimeDealsDTO> {
-    const timeDeals: UserTimeDealsDTO = await this.timeDealManager.query(
+  ): Promise<UserTimeDealsDTO[]> {
+    const timeDeals: UserTimeDealsDTO[] = await this.timeDealManager.query(
       `
       SELECT t.id,
              t.benefit,
