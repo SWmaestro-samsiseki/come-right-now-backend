@@ -130,7 +130,7 @@ export class TimeDealService {
              Round(St_distance_sphere(Point(?, ?),
                         Point(s.longitude, s.latitude))) AS distance,
              p.id AS participantId,
-             p.status,
+             p.status
       FROM  time_deal t
             LEFT JOIN store s
                     ON t.storeId = s.id
