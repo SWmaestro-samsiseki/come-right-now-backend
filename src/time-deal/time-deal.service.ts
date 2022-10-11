@@ -111,6 +111,7 @@ export class TimeDealService {
     return timeDealId;
   }
 
+  // TODO: select 값 수정
   async getTimeDealsByUserId(
     userId: string,
     longitude: number,
@@ -121,12 +122,14 @@ export class TimeDealService {
       SELECT t.id,
              t.benefit,
              t.endTime,
+             s.id AS storeId,
              s.businessName,
              s.storeImage,
              s.latitude,
              s.longitude,
              Round(St_distance_sphere(Point(?, ?),
-                        Point(s.longitude, s.latitude))) AS distance
+                        Point(s.longitude, s.latitude))) AS distance,
+             p.id AS participantId
       FROM  time_deal t
             LEFT JOIN store s
                     ON t.storeId = s.id

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ParticipantStatus } from 'src/enum/participant-status';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { TimeDeal } from 'src/time-deal/time-deal.entity';
 import { User } from 'src/user/user.entity';
@@ -48,5 +49,16 @@ export class ParticipantService {
       timeDealId,
       participantId: id,
     };
+  }
+
+  async updateStatusForCheckInTimeDeal(participantId: number) {
+    const participantStatus = ParticipantStatus.ARRIVED;
+    const result = await this.participantRepository.update(participantId, {
+      status: participantStatus,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('해당 타임딜 등록 건이 존재하지 않습니다.');
+    }
   }
 }

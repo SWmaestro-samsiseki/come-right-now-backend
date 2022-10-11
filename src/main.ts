@@ -17,7 +17,7 @@ import { Category } from './category/category.entity';
 import { LoginOutputDTO } from './account/dto/account.dto';
 import { ValidationDTO } from './account/dto/validation.dto';
 import { GetDistanceDTO } from './store/dto/get-distance.dto';
-import { HttpExceptionFilter } from './exception/http-exception.filter';
+// import { HttpExceptionFilter } from './exception/http-exception.filter';
 
 async function bootstrap() {
   // #1. 서버 환경 설정
@@ -35,7 +35,7 @@ async function initServer(port: number) {
     bufferLogs: true,
   });
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // app.useGlobalFilters(new HttpExceptionFilter());
 
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
