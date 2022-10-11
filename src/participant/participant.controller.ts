@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
@@ -12,6 +12,7 @@ import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
 import { CreateParticipantInputDTO } from './dto/create-participant.input.dto';
 import { CreateParticipantOutputDTO } from './dto/create-participant.output.dto';
+import { Participant } from './participant.entity';
 import { ParticipantService } from './participant.service';
 
 @ApiTags('participant')
@@ -46,5 +47,10 @@ export class ParticipantController {
     const userId = account.id;
 
     return await this.participantService.createParticipant(timeDealId, userId);
+  }
+
+  @Get(':id')
+  async getParticipantById(@Param('id') participantId: number): Promise<Participant> {
+    return await this.participantService.getParticipantById(participantId);
   }
 }
