@@ -16,6 +16,8 @@ import { NewrelicModule } from './newrelic/newrelic.module';
 import { TimeDealModule } from './time-deal/time-deal.module';
 import { ParticipantModule } from './participant/participant.module';
 import { TMapModule } from './t-map/t-map.module';
+import { DataSource } from 'typeorm';
+import { runSeeders } from 'typeorm-extension';
 
 @Module({
   imports: [
@@ -49,4 +51,11 @@ import { TMapModule } from './t-map/t-map.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {
+    // runSeeders(dataSource, {
+    //   seeds: ['src/database/seeds/**/*{.ts,.js}'],
+    //   factories: ['src/database/factories/**/*{.ts,.js}'],
+    // });
+  }
+}
