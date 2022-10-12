@@ -62,7 +62,7 @@ export class ParticipantService {
     }
   }
 
-  async getParticipantById(participantId: number) {
+  async getParticipantById(participantId: number): Promise<Participant> {
     const participant = await this.participantRepository.findOne({
       where: {
         id: participantId,
