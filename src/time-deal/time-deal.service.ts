@@ -137,9 +137,8 @@ export class TimeDealService {
             LEFT JOIN participant p
                     ON t.id = p.timedealid
       WHERE p.userId = ?
-            AND p.status = ?
       `,
-      [longitude, latitude, userId, ParticipantStatus.REQUESTED],
+      [longitude, latitude, userId],
     );
 
     return timeDeals;
