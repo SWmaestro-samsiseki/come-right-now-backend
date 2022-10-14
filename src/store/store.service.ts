@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { TMapService } from 'src/t-map/t-map.service';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Brackets, IsNull, Not, Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { Store } from './store.entity';
 
@@ -83,27 +83,32 @@ export class StoreService {
     startMeter: number,
     endMeter: number,
   ): Promise<Store[]> {
-    const whereOptions = [];
-    for (const category of categories) {
-      whereOptions.push({
-        categories: {
-          id: category,
+    const query = this.storeRepository.createQueryBuilder('s').leftJoin('s.categories', 'c');
+    query
+      .where(
+        `St_distance_sphere(Point(:lat, :lng), Point(s.longitude, s.latitude)) >= :start 
+      AND St_distance_sphere(Point(:lat, :lng), Point(s.longitude, s.latitude)) <= :end `,
+        {
+          lat: latitude,
+          lng: longitude,
+          start: startMeter,
+          end: endMeter,
         },
-      });
-    }
-    const totalStores = await this.storeRepository.find({
-      relations: ['categories'],
-      where: whereOptions,
-    });
-    //원하는 카테고리를 가진 stores
-    const filteredStores = totalStores.filter((store) => {
-      const distance = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (startMeter <= distance && distance <= endMeter) {
-        return true;
-      }
-      return false;
-    }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where(``);
+          for (let i = 1; i < categories.length; i++) {
+            qb.orWhere({
+              categories: {
+                id: categories[i],
+              },
+            });
+          }
+        }),
+      );
 
+    const filteredStores = await query.getMany();
     return filteredStores;
   }
 

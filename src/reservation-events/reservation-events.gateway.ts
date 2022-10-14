@@ -44,10 +44,6 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
     this.websocketLogger.websocketEventLog(eventName, true, true);
   }
 
-  public findStoreSocketId(storeId: string): string {
-    return this.storeOnlineMap[storeId];
-  }
-
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     const { uuid: id, userType } = socket.data;
     if (userType === 'USER') {
