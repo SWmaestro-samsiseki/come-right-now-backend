@@ -38,22 +38,24 @@ export class TimeDealService {
 
   // 성능 측정
   async getUserTimeDeals(latitude: number, longitude: number): Promise<TimeDeal[]> {
-    const stores = await this.storeService.getStoreWithTimeDeal();
-    const nearStores = this.storeService.filterNearStores(latitude, longitude, 0, 500, stores);
-    const whereOptions = [];
-    for (const nearStore of nearStores) {
-      whereOptions.push({
-        store: {
-          id: nearStore.id,
+    const query = this.timeDealRepository
+      .createQueryBuilder('t')
+      .leftJoinAndSelect('t.store', 's')
+      .where(
+        `St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) >= :start 
+    AND St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) <= :end `,
+        {
+          lat: latitude,
+          lng: longitude,
+          start: 0,
+          end: 500,
         },
+      )
+      .andWhere('t.status=:status', {
         status: TimeDealStatus.IN_PROGRESS,
       });
-    }
 
-    const timeDeals = await this.timeDealRepository.find({
-      relations: ['store'],
-      where: whereOptions,
-    });
+    const timeDeals = await query.getMany();
 
     if (timeDeals.length === 0) {
       throw new NotFoundException('no time deal in condition');

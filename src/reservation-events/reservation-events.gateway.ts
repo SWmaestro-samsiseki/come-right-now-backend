@@ -93,15 +93,15 @@ export class ReservationEventsGateway implements OnGatewayConnection, OnGatewayD
   }
 
   private async saveSeatCheckRequest(
-    userLatitude,
-    userLongitude,
-    storeLatitude,
-    storeLongitude,
-    delayMinutes,
-    numberOfPeople,
-    userId,
-    storeId,
-  ) {
+    userLatitude: number,
+    userLongitude: number,
+    storeLatitude: number,
+    storeLongitude: number,
+    delayMinutes: number,
+    numberOfPeople: number,
+    userId: string,
+    storeId: string,
+  ): Promise<number> {
     const estimatedTime = await this.dateUtilService.getEstimatedTime(
       userLatitude,
       userLongitude,
