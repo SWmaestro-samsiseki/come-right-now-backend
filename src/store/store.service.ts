@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { TMapService } from 'src/t-map/t-map.service';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Brackets, IsNull, Not, Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { Store } from './store.entity';
 
@@ -14,67 +14,6 @@ export class StoreService {
     private readonly tmapService: TMapService,
   ) {}
 
-  // 각도를 라디안으로 변환
-  private convertDegreeToRadian(degree: number): number {
-    return degree * (Math.PI / 180);
-  }
-
-  //두 지점 사이의 거리 계산 (직선거리)
-  //meter 단위로 반환
-  // TODO: query 계산으로 변경
-  private getDistance(
-    latitude1: number,
-    longitude1: number,
-    latitude2: number,
-    longitude2: number,
-  ): number {
-    const radius = 6371; // Radius of the earth in km
-    const latitudeRadian = this.convertDegreeToRadian(latitude2 - latitude1) / 2;
-    const longigudeRadian = this.convertDegreeToRadian(longitude2 - longitude1) / 2;
-    const temp1 =
-      Math.sin(latitudeRadian) * Math.sin(latitudeRadian) +
-      Math.cos(this.convertDegreeToRadian(latitude1)) *
-        Math.cos(this.convertDegreeToRadian(latitude2)) *
-        Math.sin(longigudeRadian) *
-        Math.sin(longigudeRadian);
-    const temp2 = 2 * Math.atan2(Math.sqrt(temp1), Math.sqrt(1 - temp1));
-    const kmDistance = radius * temp2;
-    return kmDistance * 1000;
-  }
-
-  async getStoreWithTimeDeal(): Promise<Store[]> {
-    const stores = await this.storeRepository.find({
-      relations: ['timeDeals'],
-      where: {
-        timeDeals: Not(IsNull()),
-      },
-    });
-
-    if (stores.length === 0) {
-      throw new NotFoundException('no store with time deal');
-    }
-
-    return stores;
-  }
-
-  filterNearStores(
-    latitude: number,
-    longitude: number,
-    startMeter: number,
-    endMeter: number,
-    stores: Store[],
-  ): Store[] {
-    const resultStores = stores.filter((store) => {
-      const distance = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (startMeter <= distance && distance <= endMeter) {
-        return true;
-      }
-      return false;
-    });
-
-    return resultStores;
-  }
-
   //유요한 거리에 원하는 카테고리를 포함하는 store 배열 반환
   async findStoresNearUser(
     longitude: number,
@@ -83,27 +22,32 @@ export class StoreService {
     startMeter: number,
     endMeter: number,
   ): Promise<Store[]> {
-    const whereOptions = [];
-    for (const category of categories) {
-      whereOptions.push({
-        categories: {
-          id: category,
+    const query = this.storeRepository.createQueryBuilder('s').leftJoin('s.categories', 'c');
+    query
+      .where(
+        `St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) >= :start 
+      AND St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) <= :end `,
+        {
+          lat: latitude,
+          lng: longitude,
+          start: startMeter,
+          end: endMeter,
         },
-      });
-    }
-    const totalStores = await this.storeRepository.find({
-      relations: ['categories'],
-      where: whereOptions,
-    });
-    //원하는 카테고리를 가진 stores
-    const filteredStores = totalStores.filter((store) => {
-      const distance = this.getDistance(latitude, longitude, store.latitude, store.longitude);
-      if (startMeter <= distance && distance <= endMeter) {
-        return true;
-      }
-      return false;
-    }); // 원하는 카테고리를 가지면서 거리도 일정 기준 이내의 stores
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where(`c.id=:id`, {
+            id: categories[0],
+          });
+          for (let i = 1; i < categories.length; i++) {
+            qb.orWhere(`c.id=:id`, {
+              id: categories[i],
+            });
+          }
+        }),
+      );
 
+    const filteredStores = await query.getMany();
     return filteredStores;
   }
 
