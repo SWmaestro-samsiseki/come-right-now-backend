@@ -26,7 +26,7 @@ export class TimeDeal extends BaseEntity {
 
   @ManyToOne(() => Store, (store) => store.timeDeals)
   @ApiProperty({
-    type: Store,
+    type: () => Store,
   })
   public store: Store;
 

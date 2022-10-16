@@ -30,7 +30,7 @@ export class ReservationDTO {
   user: User;
 
   @ApiProperty({
-    type: StoreForPublicDTO,
+    type: () => StoreForPublicDTO,
   })
   store: StoreForPublicDTO;
 
