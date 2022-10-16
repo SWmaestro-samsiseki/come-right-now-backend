@@ -1,4 +1,4 @@
-import { Inject, UseInterceptors } from '@nestjs/common';
+import { UseInterceptors } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
