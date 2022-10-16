@@ -10,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { Account } from 'src/account/account.entity';
 import { getAccount } from 'src/account/get-account.decorator';
+import { TimeDealService } from 'src/time-deal/time-deal.service';
 import { CreateParticipantInputDTO } from './dto/create-participant.input.dto';
 import { CreateParticipantOutputDTO } from './dto/create-participant.output.dto';
 import { Participant } from './participant.entity';
@@ -18,7 +19,10 @@ import { ParticipantService } from './participant.service';
 @ApiTags('participant')
 @Controller('participant')
 export class ParticipantController {
-  constructor(private readonly participantService: ParticipantService) {}
+  constructor(
+    private readonly participantService: ParticipantService,
+    private readonly timeDealService: TimeDealService,
+  ) {}
 
   @ApiHeader({
     name: 'Authorization',
@@ -43,6 +47,7 @@ export class ParticipantController {
     @getAccount() account: Account,
     @Body() createParticipantDTO: CreateParticipantInputDTO,
   ): Promise<CreateParticipantOutputDTO> {
+    await this.timeDealService.checkTimeDealValidation();
     const { timeDealId } = createParticipantDTO;
     const userId = account.id;
 
