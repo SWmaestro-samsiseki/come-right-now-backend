@@ -38,9 +38,9 @@ export class TimeDealController {
     description: 'Not Found',
   })
   @Get('store')
-  async getStoreTimeDeal(@Query('storeId') storeId: string): Promise<TimeDeal> {
+  async getStoreTimeDeals(@Query('storeId') storeId: string): Promise<TimeDeal[]> {
     await this.timeDealService.checkTimeDealValidation();
-    return await this.timeDealService.getStoreTimeDeal(storeId);
+    return await this.timeDealService.getStoreTimeDeals(storeId);
   }
 
   @ApiOkResponse({

@@ -17,23 +17,40 @@ export class TimeDealService {
     @InjectEntityManager() private timeDealManager: EntityManager,
   ) {}
 
-  async getStoreTimeDeal(storeId: string): Promise<TimeDeal> {
-    const timeDeal = await this.timeDealRepository
+  async getStoreTimeDeals(storeId: string): Promise<TimeDeal[]> {
+    const openTimeDealquery = await this.timeDealRepository
       .createQueryBuilder('timeDeal')
       .leftJoinAndSelect('timeDeal.participants', 'participant')
       .leftJoinAndSelect('participant.user', 'user')
-      .leftJoin('timeDeal.store', 'store')
-      .where('timeDeal.store.id = :id AND timeDeal.status = :status', {
-        id: storeId,
-        status: TimeDealStatus.IN_PROGRESS,
-      })
-      .getOne();
+      .leftJoin('timeDeal.store', 'store');
 
-    if (!timeDeal) {
+    openTimeDealquery.where('timeDeal.store.id = :id AND timeDeal.status = :status', {
+      id: storeId,
+      status: TimeDealStatus.IN_PROGRESS,
+    });
+
+    const openTimeDeals = await openTimeDealquery.getMany();
+
+    const closeTimeDealquery = await this.timeDealRepository
+      .createQueryBuilder('timeDeal')
+      .innerJoinAndSelect('timeDeal.participants', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
+      .leftJoin('timeDeal.store', 'store');
+
+    closeTimeDealquery.where('timeDeal.store.id = :id AND timeDeal.status = :status', {
+      id: storeId,
+      status: TimeDealStatus.CLOSED,
+    });
+
+    const closeTimeDeals = await closeTimeDealquery.getMany();
+
+    const timeDeals = [...openTimeDeals, ...closeTimeDeals];
+
+    if (timeDeals.length === 0) {
       throw new NotFoundException('no timeDeal');
     }
 
-    return timeDeal;
+    return timeDeals;
   }
 
   // 성능 측정
