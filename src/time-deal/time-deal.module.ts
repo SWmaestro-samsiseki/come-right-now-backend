@@ -1,11 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DateUtilModule } from 'src/date-util/date-util.module';
 import { LoggerModule } from 'src/logger/logger.module';
 import { ParticipantModule } from 'src/participant/participant.module';
-import { storeOnlineMap } from 'src/reservation-events/onlineMaps/store.onlineMap';
-import { ReservationEventsModule } from 'src/reservation-events/reservation-events.module';
 import { StoreModule } from 'src/store/store.module';
 import { TimeDealEventsGateway } from './time-deal-events.gateway';
 import { TimeDealController } from './time-deal.controller';
@@ -19,9 +17,10 @@ import { TimeDealService } from './time-deal.service';
     DateUtilModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     LoggerModule,
-    ParticipantModule,
+    forwardRef(() => ParticipantModule),
   ],
   controllers: [TimeDealController],
   providers: [TimeDealService, TimeDealEventsGateway],
+  exports: [TimeDealService],
 })
 export class TimeDealModule {}
