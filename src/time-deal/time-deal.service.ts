@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
-import { ParticipantStatus } from 'src/enum/participant-status';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { StoreService } from 'src/store/store.service';
 import { LessThan, EntityManager } from 'typeorm';

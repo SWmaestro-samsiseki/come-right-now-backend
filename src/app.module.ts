@@ -18,6 +18,8 @@ import { ParticipantModule } from './participant/participant.module';
 import { TMapModule } from './t-map/t-map.module';
 import { DataSource } from 'typeorm';
 import { runSeeders } from 'typeorm-extension';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './exception/http-exception.filter';
 
 @Module({
   imports: [
@@ -49,7 +51,13 @@ import { runSeeders } from 'typeorm-extension';
     TMapModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {
