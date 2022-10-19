@@ -5,6 +5,10 @@ import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { Account } from './account.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from 'src/enum/user-type.enum';
+import { SignupDTO } from './dto/sign-up.dto';
+import { CryptUtilService } from 'src/crypt-util/crypt-util.service';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDTO } from 'src/user/dto/create-user.dto';
 
 type JWTPayload = {
   uuid: string;
@@ -17,6 +21,8 @@ export class AccountService {
   constructor(
     @InjectRepository(Account) private accountRepository: Repository<Account>,
     private jwtService: JwtService,
+    private readonly cryptUtilService: CryptUtilService,
+    private readonly userService: UserService,
   ) {}
 
   async login(loginInputDto: LoginInputDTO): Promise<LoginOutputDTO> {
@@ -45,5 +51,32 @@ export class AccountService {
     });
 
     return decoded;
+  }
+
+  async createAccount(signupDTO: SignupDTO) {
+    const { email, password, name, phone, birthDate } = signupDTO;
+
+    const account = new Account();
+    account.email = email;
+    account.password = await this.cryptUtilService.hash(password);
+    account.userType = UserType.USER;
+
+    const newAccount = await account.save();
+
+    const payload: JWTPayload = { uuid: newAccount.id, email, userType: account.userType };
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET_KEY,
+    });
+
+    const createUserDTO: CreateUserDTO = {
+      name,
+      phone,
+      birthDate,
+      id: newAccount.id,
+    };
+    await this.userService.createUser(createUserDTO);
+    return {
+      token,
+    };
   }
 }

@@ -20,6 +20,7 @@ import { DataSource } from 'typeorm';
 import { runSeeders } from 'typeorm-extension';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
+import { CryptUtilModule } from './crypt-util/crypt-util.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { HttpExceptionFilter } from './exception/http-exception.filter';
     TimeDealModule,
     ParticipantModule,
     TMapModule,
+    CryptUtilModule,
   ],
   controllers: [AppController],
   providers: [

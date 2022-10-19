@@ -4,6 +4,7 @@ import { LoginInputDTO, LoginOutputDTO } from './dto/account.dto';
 import { AccountService } from './account.service';
 import { getAccount } from './get-account.decorator';
 import {
+  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiHeader,
   ApiOkResponse,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/swagger';
 import { Account } from './account.entity';
 import { ValidationDTO } from './dto/validation.dto';
+import { SignupDTO } from './dto/sign-up.dto';
 
 @ApiTags('account')
 @Controller('account')
@@ -45,5 +47,17 @@ export class AccountController {
   @UseGuards(AuthGuard())
   checkValidation(@getAccount() account: Account): ValidationDTO {
     return { statusCode: 200, userType: account.userType };
+  }
+
+  @ApiCreatedResponse({
+    description: 'token',
+    type: String,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+  })
+  @Post('/signup')
+  async createAccount(@Body() signupDTO: SignupDTO) {
+    return await this.accountService.createAccount(signupDTO);
   }
 }

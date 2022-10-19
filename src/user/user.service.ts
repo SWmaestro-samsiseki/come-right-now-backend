@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateUserDTO } from './dto/create-user.dto';
 import { UserInfoDTO } from './dto/user.dto';
 import { User } from './user.entity';
 
@@ -50,5 +51,18 @@ export class UserService {
     };
 
     return userInfoData;
+  }
+
+  async createUser(createUserDTO: CreateUserDTO) {
+    const { name, phone, birthDate } = createUserDTO;
+
+    const user = new User();
+    user.id = createUserDTO.id;
+    user.name = name;
+    user.phone = phone;
+    user.birthDate = birthDate;
+    user.creditRate = 5;
+
+    return await user.save();
   }
 }

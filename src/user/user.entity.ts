@@ -28,7 +28,7 @@ export class User extends BaseEntity {
   @ApiProperty()
   public phone: string;
 
-  @Column({ type: 'varchar', length: 6, nullable: false })
+  @Column({ type: 'varchar', length: 6, nullable: true })
   @ApiProperty()
   public birthDate: string;
 
