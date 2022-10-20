@@ -10,6 +10,8 @@ import { WebsocketLogger } from 'src/logger/logger.service';
 import { NewrelicWebsocketInterceptor } from 'src/newrelic/newrelic.websocket.interceptor';
 import { ParticipantService } from 'src/participant/participant.service';
 import { storeOnlineMap } from 'src/reservation-events/onlineMaps/store.onlineMap';
+import { StoreService } from 'src/store/store.service';
+import { CheckInInputDTO } from './dto/check-in-input.dto';
 import { TimeDealService } from './time-deal.service';
 
 @WebSocketGateway({
@@ -24,6 +26,7 @@ export class TimeDealEventsGateway {
   constructor(
     private readonly timeDealService: TimeDealService,
     private readonly participantService: ParticipantService,
+    private readonly storeService: StoreService,
     private readonly websocketLogger: WebsocketLogger,
   ) {
     this.websocketLogger.setContext('reservation-events');
@@ -34,12 +37,12 @@ export class TimeDealEventsGateway {
     this.websocketLogger.websocketEventLog(eventName, true, true);
   }
 
-  @SubscribeMessage('user.check-in-time-deal.server')
-  async checkInTimeDealEvent(
+  @SubscribeMessage('user.check-in-time-deal-test.server')
+  async checkInTimeDealTestEvent(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: { participantId: number; storeId: string },
   ) {
-    this.websocketLogger.websocketEventLog('user.check-in-time-deal.server', false, true);
+    this.websocketLogger.websocketEventLog('user.check-in-time-deal-test.server', false, true);
 
     try {
       const { participantId, storeId } = data;
@@ -52,9 +55,61 @@ export class TimeDealEventsGateway {
       this.websocketLogger.websocketEventLog('server.check-in-time-deal.store', true, false);
       this.websocketLogger.error(e);
 
-      return false;
+      return {
+        isSuccess: false,
+      };
     }
 
-    return true;
+    return {
+      isSuccess: true,
+      message: '체크인 성공',
+    };
+  }
+
+  @SubscribeMessage('user.check-in-time-deal.server')
+  async checkInTimeDealEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() checkInInput: CheckInInputDTO,
+  ) {
+    this.websocketLogger.websocketEventLog('user.check-in-time-deal.server', false, true);
+
+    try {
+      const { participantId, storeId, latitude, longitude } = checkInInput;
+
+      const { latitude: storeLatitude, longitude: storeLongitude } =
+        await this.storeService.getStoreByIdForPublic(storeId);
+
+      const distance = await this.storeService.getDistanceMeterFromTmap(
+        latitude,
+        longitude,
+        storeLatitude,
+        storeLongitude,
+      );
+      const CHECK_IN_DISTANCE = 50;
+
+      if (distance > CHECK_IN_DISTANCE) {
+        return {
+          isSuccess: false,
+          message: '체크인이 가능한 거리가 아닙니다.',
+        };
+      }
+
+      await this.participantService.updateStatusForCheckInTimeDeal(participantId);
+
+      const storeSocketId = storeOnlineMap[storeId];
+      this.emitSocketEvent(socket, storeSocketId, 'server.check-in-time-deal.store', participantId);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.check-in-time-deal.store', true, false);
+      this.websocketLogger.error(e);
+
+      return {
+        isSuccess: false,
+      };
+    }
+
+    return {
+      isSuccess: true,
+      message: '체크인 성공',
+    };
   }
 }

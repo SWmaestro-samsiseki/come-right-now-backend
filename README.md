@@ -140,3 +140,4 @@ Feat: 회원 가입 기능 구현 (#WTD-18)
 ```
 
 <img width="314" alt="스크린샷_2022-06-29_오후_4 14 07" src="https://user-images.githubusercontent.com/55343124/195807384-b20a49f4-2c54-4a2c-a6a0-62cc24116773.png">
+
