@@ -37,6 +37,35 @@ export class TimeDealEventsGateway {
     this.websocketLogger.websocketEventLog(eventName, true, true);
   }
 
+  @SubscribeMessage('user.check-in-time-deal-test.server')
+  async checkInTimeDealTestEvent(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: { participantId: number; storeId: string },
+  ) {
+    this.websocketLogger.websocketEventLog('user.check-in-time-deal-test.server', false, true);
+
+    try {
+      const { participantId, storeId } = data;
+
+      await this.participantService.updateStatusForCheckInTimeDeal(participantId);
+
+      const storeSocketId = storeOnlineMap[storeId];
+      this.emitSocketEvent(socket, storeSocketId, 'server.check-in-time-deal.store', participantId);
+    } catch (e) {
+      this.websocketLogger.websocketEventLog('server.check-in-time-deal.store', true, false);
+      this.websocketLogger.error(e);
+
+      return {
+        isSuccess: false,
+      };
+    }
+
+    return {
+      isSuccess: true,
+      message: '체크인 성공',
+    };
+  }
+
   @SubscribeMessage('user.check-in-time-deal.server')
   async checkInTimeDealEvent(
     @ConnectedSocket() socket: Socket,
