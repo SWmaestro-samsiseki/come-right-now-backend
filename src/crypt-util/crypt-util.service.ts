@@ -8,7 +8,7 @@ export class CryptUtilService {
     return await bcrypt.hash(text, salt);
   }
 
-  public async isHashValid(password: string, hashedPassword: string) {
+  public async isHashValid(password: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
   }
 }

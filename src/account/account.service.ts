@@ -28,8 +28,24 @@ export class AccountService {
   async login(loginInputDto: LoginInputDTO): Promise<LoginOutputDTO> {
     const { email, password } = loginInputDto;
     const account = await this.accountRepository.findOne({ where: { email } });
-    // FIXME: 암호화
-    if (account && password === account.password) {
+    if (account.id.length <= 5) {
+      if (account && password === account.password) {
+        const payload: JWTPayload = { uuid: account.id, email, userType: account.userType };
+        const accessToken = this.jwtService.sign(payload, {
+          secret: process.env.JWT_SECRET_KEY,
+        });
+        return {
+          isSuccess: true,
+          message: '로그인에 성공했습니다.',
+          accessToken,
+          userType: account.userType,
+        };
+      } else {
+        throw new UnauthorizedException('아이디 또는 비밀번호가 일치하지 않습니다.');
+      }
+    }
+
+    if (await this.cryptUtilService.isHashValid(password, account.password)) {
       const payload: JWTPayload = { uuid: account.id, email, userType: account.userType };
       const accessToken = this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET_KEY,
