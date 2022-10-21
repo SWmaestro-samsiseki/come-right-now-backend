@@ -49,7 +49,7 @@
 
 ## ER 다이어그램
 
-![Copy of come-right-now-erd](https://user-images.githubusercontent.com/55343124/196993157-aa3bc70a-adf9-48fb-9ac0-98fb7083287e.png)
+![Copy of come-right-now-erd (1)](https://user-images.githubusercontent.com/55343124/197182512-7a580ab8-d4a2-4ffb-b3b8-e69e1063bcc7.png)
 
 ---
 
