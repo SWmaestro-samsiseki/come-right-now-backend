@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
@@ -15,6 +15,24 @@ export class TimeDealService {
     private readonly dateUtilService: DateUtilService,
     @InjectEntityManager() private timeDealManager: EntityManager,
   ) {}
+
+  async findAndCheckTimeDeal(timeDealId: number): Promise<TimeDeal> {
+    const timeDeal = await this.timeDealRepository.findOne({
+      where: {
+        id: timeDealId,
+      },
+    });
+
+    if (!timeDeal) {
+      throw new NotFoundException('no time deal');
+    }
+
+    if (timeDeal.status === TimeDealStatus.CLOSED) {
+      throw new BadRequestException('time deal is closed');
+    }
+
+    return timeDeal;
+  }
 
   async getStoreTimeDeals(storeId: string): Promise<TimeDeal[]> {
     const openTimeDealquery = await this.timeDealRepository

@@ -1,11 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { anyString, anything, instance, mock, reset, when } from 'ts-mockito';
+import { anything, instance, mock, reset, when } from 'ts-mockito';
 import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CategoryService } from './category.service';
 
-describe('categoryService', () => {
+describe('CategoryService', () => {
   let categoryService: CategoryService;
 
   const categoryRepository: Repository<Category> = mock<Repository<Category>>();
