@@ -37,10 +37,13 @@ async function initServer(port: number) {
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  const redisIoAdapter = new RedisIoAdapter(app);
-  await redisIoAdapter.connectToRedis();
+  if (process.env.NODE_ENV === 'production') {
+    const redisIoAdapter = new RedisIoAdapter(app);
+    await redisIoAdapter.connectToRedis();
 
-  app.useWebSocketAdapter(redisIoAdapter);
+    app.useWebSocketAdapter(redisIoAdapter);
+  }
+
   app.enableCors();
   app.use(morgan('tiny'));
   app.useLogger(new WebsocketLogger());

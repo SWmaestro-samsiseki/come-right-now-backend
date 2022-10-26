@@ -1,10 +1,3 @@
-/**
- * File: reservation.service.ts
- * Description: 예약 API 비즈니스 로직
- * Revision
- * 1. [221025] 리팩토링 위한 createReservationQuery 메소드 분리
- */
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
@@ -26,11 +19,6 @@ export class ReservationService {
     private readonly dateUtilService: DateUtilService,
   ) {}
 
-  /**
-   * 
-   * @param {Reservation} reservation 설명
-   * @returns {ReservationDTO} 
-   */
   private filterPrivateReservationData(reservation: Reservation): ReservationDTO {
     const dayOfWeekToday = this.dateUtilService.getDayOfWeekToday();
     const storeObj = Object(reservation.store);
@@ -61,12 +49,15 @@ export class ReservationService {
     return result;
   }
 
-  /**
-   * 예약 목록 획득을 위한 공통 쿼리 객체 반환
-   * @returns 
-   */
-  async createReservationQuery() {
-    return this.reservationRepository
+  async getReservationsByUserId(
+    status: string,
+    userId: string,
+    orderby = 'default',
+  ): Promise<ReservationDTO[]> {
+    if (orderby === 'date') {
+      const reservationStatus = ReservationStatus[status.toUpperCase()];
+
+      const reservations = await this.reservationRepository
         .createQueryBuilder('r')
         .select([
           'r.id',
@@ -106,77 +97,143 @@ export class ReservationService {
         .where('u.id = :id AND r.reservationStatus = :status', {
           id: userId,
           status: reservationStatus,
-        });
-  }
+        })
+        .orderBy('r.arrivalTime', 'DESC')
+        .getMany();
 
-  async getReservationsByUserId(
-    status: string,
-    userId: string,
-    orderby = 'default',
-  ): Promise<ReservationDTO[]> {
-    status = status.toUpperCase();
-
-    const reservationStatus = ReservationStatus[status];
-    const query = createReservationQuery();
-
-    // #1. 정렬 요청
-    if (orderby === 'date') {
-      const reservations = await query.orderBy('r.arrivalTime', 'DESC').getMany();
       if (reservations.length === 0) {
         throw new NotFoundException('no reservation');
       }
-
+      console.log(reservations);
       const result = reservations.map((r) => this.filterPrivateReservationData(r));
       return result;
     }
-    // #2. 일반 예약 확인
-    else {
-      const reservation = await query.getOne();
-      if (!reservation) {
-        throw new NotFoundException('no reservation');
-      }
+    const reservationStatus = ReservationStatus[status.toUpperCase()];
 
-      const result: ReservationDTO = this.filterPrivateReservationData(reservation);
-      return [result];
+    const reservation = await this.reservationRepository
+      .createQueryBuilder('r')
+      .select([
+        'r.id',
+        'r.numberOfPeople',
+        'r.estimatedTime',
+        'r.createdAt',
+        'r.reservationStatus',
+        'r.delayMinutes',
+        'u.id',
+        'u.name',
+        'u.phone',
+        'u.birthDate',
+        'u.creditRate',
+        's.id',
+        's.businessName',
+        's.storeType',
+        's.latitude',
+        's.longitude',
+        's.storePhone',
+        's.introduce',
+        's.storeImage',
+        's.mainMenu1',
+        's.mainMenu2',
+        's.mainMenu3',
+        's.menuImage',
+        's.starRate',
+        's.address',
+        'b.id',
+        'b.businessDay',
+        'b.openAt',
+        'b.closeAt',
+      ])
+      .leftJoin('r.store', 's')
+      .leftJoin('r.user', 'u')
+      .leftJoin('s.businessHours', 'b')
+      .where('u.id = :id AND r.reservationStatus = :status', {
+        id: userId,
+        status: reservationStatus,
+      })
+      .getOne();
+
+    if (!reservation) {
+      throw new NotFoundException('no reservation');
     }
+
+    const result: ReservationDTO = this.filterPrivateReservationData(reservation);
+    return [result];
   }
 
-  /**
-   * 
-   * @param status {string}
-   * @param storeId {string}
-   * @returns 
-   */
   async getStoreReservationByStatus(status: string, storeId: string): Promise<ReservationDTO[]> {
-    status = status.toUpperCase();
+    const reservationStatus = ReservationStatus[status.toUpperCase()];
 
-    const reservationStatus = ReservationStatus[status];
-    const query = createReservationQuery();
-
-    const reservations = await query.getMany();
-    return reservations.map(this.filterPrivateReservationData);
+    const reservations = await this.reservationRepository
+      .createQueryBuilder('r')
+      .select([
+        'r.id',
+        'r.numberOfPeople',
+        'r.estimatedTime',
+        'r.createdAt',
+        'r.reservationStatus',
+        'u.id',
+        'u.name',
+        'u.phone',
+        'u.birthDate',
+        'u.creditRate',
+        's.id',
+        's.businessName',
+        's.storeType',
+        's.latitude',
+        's.longitude',
+        's.storePhone',
+        's.introduce',
+        's.storeImage',
+        's.mainMenu1',
+        's.mainMenu2',
+        's.mainMenu3',
+        's.menuImage',
+        's.starRate',
+        's.address',
+        'b.id',
+        'b.businessDay',
+        'b.openAt',
+        'b.closeAt',
+      ])
+      .leftJoin('r.store', 's')
+      .leftJoin('r.user', 'u')
+      .leftJoin('s.businessHours', 'b')
+      .where('s.id = :id AND r.reservationStatus = :status', {
+        id: storeId,
+        status: reservationStatus,
+      })
+      .getMany();
+    const results = [];
+    for (const reservation of reservations) {
+      const result: ReservationDTO = this.filterPrivateReservationData(reservation);
+      results.push(result);
+    }
+    return results;
   }
 
-  /**
-   * 
-   * @param {CreateReservationDTO} createReservationDTO 
-   * @returns 
-   */
   async createReservation(createReservationDTO: CreateReservationDTO): Promise<number> {
+    const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId, delayMinutes } = createReservationDTO;
     const nowDate = this.dateUtilService.getNowDate();
 
-    // #1. 예약 정보 획득
-    const reservation = this.reservationRepository.create();
     reservation.reservationStatus = ReservationStatus.REQUESTED;
     reservation.numberOfPeople = numberOfPeople;
     reservation.estimatedTime = estimatedTime;
     reservation.createdAt = nowDate;
     reservation.delayMinutes = delayMinutes;
-    reservation.store = await this.storeRepository.findOne({where: {id: storeId}});
-    reservation.user = await this.userRepository.findOne({where: {id: userId}});
 
-    // #2. 예약 정보 기록
+    const store = await this.storeRepository.findOne({
+      where: {
+        id: storeId,
+      },
+    });
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    reservation.store = store;
+    reservation.user = user;
     const result = await this.reservationRepository.save(reservation);
     return result.id;
   }
@@ -222,7 +279,7 @@ export class ReservationService {
       .getOne();
 
     if (!reservation) {
-      throw new NotFoundException('Not found reservation.');
+      throw new NotFoundException('no reservation');
     }
 
     const result = this.filterPrivateReservationData(reservation);
@@ -285,17 +342,16 @@ export class ReservationService {
     const reservations = await this.getReservationsByUserId(status, userId, 'date');
     const result = [];
     for (const reservation of reservations) {
-      const isFirst = result.length == 0;
-      if (!isFirst) {
+      const arrivalTime = reservation.arrivalTime;
+      if (result.length !== 0) {
         const lastReservationArrivalTime = result[result.length - 1][0].arrivalTime;
-        const sameDate = this.dateUtilService.compareDateAndMonthAndYear(reservation.arrivalTime, lastReservationArrivalTime);
-        if (sameDate) {
-          const lastItem = result[result.length - 1];
-          lastItem.push(reservation);
+        if (
+          this.dateUtilService.compareDateAndMonthAndYear(arrivalTime, lastReservationArrivalTime)
+        ) {
+          result[result.length - 1].push(reservation);
           continue;
         }
       }
-      
       result.push([reservation]);
     }
 
