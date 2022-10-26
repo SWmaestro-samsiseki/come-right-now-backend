@@ -17,7 +17,6 @@ import { TimeDealModule } from './time-deal/time-deal.module';
 import { ParticipantModule } from './participant/participant.module';
 import { TMapModule } from './t-map/t-map.module';
 import { DataSource } from 'typeorm';
-import { runSeeders } from 'typeorm-extension';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
 import { CryptUtilModule } from './crypt-util/crypt-util.module';
