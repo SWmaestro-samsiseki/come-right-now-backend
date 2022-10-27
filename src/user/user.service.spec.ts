@@ -2,9 +2,8 @@ import { faker } from '@faker-js/faker';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { anything, instance, mock, reset, when } from 'ts-mockito';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { UserInfoDTO } from './dto/user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 
