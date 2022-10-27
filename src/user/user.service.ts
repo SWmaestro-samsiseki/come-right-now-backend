@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -22,7 +22,7 @@ export class UserService {
   }
 
   async getUserInfo(userId: string): Promise<UserInfoDTO> {
-    const userInfo = await this.userRepository
+    const query = this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndMapOne('user.account', 'user.id', 'account')
       .select([
@@ -33,8 +33,9 @@ export class UserService {
         'user.creditRate',
         'account.email',
       ])
-      .where('user.id = :userId', { userId })
-      .getOne();
+      .where('user.id = :userId', { userId });
+
+    const userInfo = await query.getOne();
 
     if (!userInfo) {
       throw new NotFoundException('no user');
@@ -56,13 +57,24 @@ export class UserService {
   async createUser(createUserDTO: CreateUserDTO) {
     const { name, phone, birthDate } = createUserDTO;
 
-    const user = new User();
-    user.id = createUserDTO.id;
-    user.name = name;
-    user.phone = phone;
-    user.birthDate = birthDate;
-    user.creditRate = 5;
+    const u = await this.userRepository.find({
+      where: {
+        id: createUserDTO.id,
+      },
+    });
 
-    return await user.save();
+    if (u) {
+      throw new BadRequestException();
+    }
+
+    const user = this.userRepository.create({
+      id: createUserDTO.id,
+      name,
+      phone,
+      birthDate,
+      creditRate: 5,
+    });
+
+    return await this.userRepository.save(user);
   }
 }
