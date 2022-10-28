@@ -212,15 +212,16 @@ export class ReservationService {
   }
 
   async createReservation(createReservationDTO: CreateReservationDTO): Promise<number> {
-    const reservation = this.reservationRepository.create();
     const { numberOfPeople, storeId, estimatedTime, userId, delayMinutes } = createReservationDTO;
     const nowDate = this.dateUtilService.getNowDate();
 
-    reservation.reservationStatus = ReservationStatus.REQUESTED;
-    reservation.numberOfPeople = numberOfPeople;
-    reservation.estimatedTime = estimatedTime;
-    reservation.createdAt = nowDate;
-    reservation.delayMinutes = delayMinutes;
+    const reservation = this.reservationRepository.create({
+      reservationStatus: ReservationStatus.REQUESTED,
+      createdAt: nowDate,
+      numberOfPeople,
+      estimatedTime,
+      delayMinutes,
+    });
 
     const store = await this.storeRepository.findOne({
       where: {
@@ -286,6 +287,7 @@ export class ReservationService {
     return result;
   }
 
+  // FIXME: status string값 수정
   async updateReservationStatus(reservationId: number, status: string) {
     const reservationStatus = ReservationStatus[status];
     const result = await this.reservationRepository.update(reservationId, { reservationStatus });
