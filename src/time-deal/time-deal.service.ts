@@ -1,16 +1,16 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { TimeDealStatus } from 'src/enum/time-deal-status';
 import { StoreService } from 'src/store/store.service';
-import { LessThan, EntityManager } from 'typeorm';
+import { LessThan, EntityManager, Repository } from 'typeorm';
 import { UserTimeDealsDTO } from './dto/user-time-deals.dto';
 import { TimeDeal } from './time-deal.entity';
 
 @Injectable()
 export class TimeDealService {
   constructor(
-    @InjectRepository(TimeDeal) private readonly timeDealRepository,
+    @InjectRepository(TimeDeal) private readonly timeDealRepository: Repository<TimeDeal>,
     private readonly storeService: StoreService,
     private readonly dateUtilService: DateUtilService,
     @InjectEntityManager() private timeDealManager: EntityManager,
@@ -98,23 +98,18 @@ export class TimeDealService {
   }
 
   async createTimeDeal(duration: number, benefits: string, storeId: string) {
-    const timeDeal = this.timeDealRepository.create();
-    const nowDate = this.dateUtilService.getNowDate();
-    const endTime = this.dateUtilService.addMinute([duration], nowDate);
+    const endTime = this.dateUtilService.addMinute([duration], this.dateUtilService.getNowDate());
     const store = await this.storeService.getStoreById(storeId);
 
-    timeDeal.endTime = endTime;
-    timeDeal.benefit = benefits;
-    timeDeal.status = TimeDealStatus.IN_PROGRESS;
-    timeDeal.store = store;
-
-    const { id } = await this.timeDealRepository.save(timeDeal);
-    const result = await this.timeDealRepository.findOne({
-      where: {
-        id,
-      },
+    const timeDeal = this.timeDealRepository.create({
+      endTime,
+      benefit: benefits,
+      status: TimeDealStatus.IN_PROGRESS,
+      store: store,
     });
-    return result;
+
+    await this.timeDealRepository.save(timeDeal);
+    return timeDeal;
   }
 
   async checkTimeDealValidation() {
