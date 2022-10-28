@@ -18,7 +18,7 @@ export class LoginOutputDTO {
   message: string;
 
   @ApiProperty()
-  accessToken: string;
+  token: string;
 
   @ApiProperty()
   userType: string;

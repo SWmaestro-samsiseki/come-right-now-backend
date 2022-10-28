@@ -37,7 +37,7 @@ export class AccountService {
         return {
           isSuccess: true,
           message: '로그인에 성공했습니다.',
-          accessToken,
+          token: accessToken,
           userType: account.userType,
         };
       } else {
@@ -53,7 +53,7 @@ export class AccountService {
       return {
         isSuccess: true,
         message: '로그인에 성공했습니다.',
-        accessToken,
+        token: accessToken,
         userType: account.userType,
       };
     } else {
