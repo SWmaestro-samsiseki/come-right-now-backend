@@ -11,10 +11,6 @@ import { CreateReservationDTO } from './dto/create-reservation.dto';
 import { Reservation } from './reservation.entity';
 import { ReservationService } from './reservation.service';
 
-type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
-};
-
 describe('ReservationService', () => {
   let reservationService: ReservationService;
 
