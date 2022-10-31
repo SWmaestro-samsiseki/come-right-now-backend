@@ -7,6 +7,12 @@ export class AppController {
 
   @Get()
   getHello(): string {
+    console.log({
+      host: process.env.TYPEORM_HOST,
+      user: process.env.TYPEORM_USERNAME,
+      password: process.env.TYPEORM_PASSWORD,
+      database: process.env.TYPEORM_DATABASE,
+    });
     return this.appService.getHello();
   }
 }
