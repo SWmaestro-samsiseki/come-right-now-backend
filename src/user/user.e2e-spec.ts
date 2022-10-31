@@ -5,7 +5,6 @@ import * as request from 'supertest';
 
 describe('User', () => {
   let app: INestApplication;
-  // TODO: 로그인해서 토큰 값 가져오기
   let token = '';
 
   beforeAll(async () => {
@@ -25,13 +24,13 @@ describe('User', () => {
         password: 'q1w2e3r4',
       })
       .end((err: any, res: any) => {
-        token = res.body.accessToken; // 받은 응답을 위에서 선언한 token에 담아준다
+        token = res.body.token;
         done();
       });
   });
 
   describe('GET /users', () => {
-    it('should return an array of users', async () => {
+    it('should return details of user', async () => {
       return request(app.getHttpServer())
         .get('/user/my-info')
         .set('Accept', 'application/json')
