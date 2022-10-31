@@ -22,8 +22,9 @@ export class StoreService {
     startMeter: number,
     endMeter: number,
   ): Promise<Store[]> {
-    const query = this.storeRepository.createQueryBuilder('s').leftJoin('s.categories', 'c');
-    query
+    const query = this.storeRepository
+      .createQueryBuilder('s')
+      .leftJoin('s.categories', 'c')
       .where(
         `St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) >= :start 
       AND St_distance_sphere(Point(:lng, :lat), Point(s.longitude, s.latitude)) <= :end `,
@@ -34,20 +35,10 @@ export class StoreService {
           end: endMeter,
         },
       )
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where(`c.id=:id`, {
-            id: categories[0],
-          });
-          for (let i = 1; i < categories.length; i++) {
-            qb.orWhere(`c.id=:id`, {
-              id: categories[i],
-            });
-          }
-        }),
-      );
+      .andWhere('c.id IN (:...categories)', { categories });
 
     const filteredStores = await query.getMany();
+    console.log(query.getSql());
     return filteredStores;
   }
 
