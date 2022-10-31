@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtilService } from 'src/date-util/date-util.service';
 import { TMapService } from 'src/t-map/t-map.service';
-import { Brackets, IsNull, Not, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { StoreForPublicDTO } from './dto/store-for-public.dto';
 import { Store } from './store.entity';
 

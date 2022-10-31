@@ -9,12 +9,8 @@ import { SignupDTO } from './dto/sign-up.dto';
 import { CryptUtilService } from 'src/crypt-util/crypt-util.service';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDTO } from 'src/user/dto/create-user.dto';
-
-type JWTPayload = {
-  uuid: string;
-  email: string;
-  userType: UserType;
-};
+import { JWTPayload } from './type/jwt-payload.type';
+import { CreateAccountDTO } from './dto/create-account.dto';
 
 @Injectable()
 export class AccountService {
@@ -69,17 +65,18 @@ export class AccountService {
     return decoded;
   }
 
-  async createAccount(signupDTO: SignupDTO) {
+  async createAccount(signupDTO: SignupDTO): Promise<CreateAccountDTO> {
     const { email, password, name, phone, birthDate } = signupDTO;
 
-    const account = new Account();
-    account.email = email;
-    account.password = await this.cryptUtilService.hash(password);
-    account.userType = UserType.USER;
+    const account = this.accountRepository.create({
+      email,
+      password: await this.cryptUtilService.hash(password),
+      userType: UserType.USER,
+    });
 
-    const newAccount = await account.save();
+    const { id } = await this.accountRepository.save(account);
 
-    const payload: JWTPayload = { uuid: newAccount.id, email, userType: account.userType };
+    const payload: JWTPayload = { uuid: id, email, userType: account.userType };
     const token = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
     });
@@ -88,7 +85,7 @@ export class AccountService {
       name,
       phone,
       birthDate,
-      id: newAccount.id,
+      id,
     };
     await this.userService.createUser(createUserDTO);
     return {
