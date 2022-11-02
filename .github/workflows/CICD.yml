@@ -5,8 +5,17 @@ on:
     branches: ['develop']
 
 jobs:
-  steps:
-    - name: create env file
+  test:
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [16.15.1]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: create env file
         working-directory: ./
         run: |
           touch .development.env
@@ -21,16 +30,6 @@ jobs:
           echo TZ=${{ secrets.TZ }} >> .development.env
           echo REDIS_ENDPOINT=${{ secrets.REDIS_ENDPOINT }} >> .development.env
           cat .development.env
-
-  test:
-    runs-on: ubuntu-18.04
-
-    strategy:
-      matrix:
-        node-version: [16.15.1]
-
-    steps:
-      - uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
