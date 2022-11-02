@@ -40,7 +40,7 @@ jobs:
           cat .development.env
 
       - name: Unit Test
-        run: npm test --detectOpenHandles --forceExit
+        run: npm test
 
   buildAndDeploy:
     needs: [test]
