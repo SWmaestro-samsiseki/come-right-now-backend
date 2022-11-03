@@ -61,21 +61,21 @@ jobs:
 
       - run: npm ci
 
-      # - name: create env file
-      #   working-directory: ./
-      #   run: |
-      #     touch .development.env
-      #     echo SERVER_PORT=${{ secrets.SERVER_PORT }} >> .development.env
-      #     echo TYPEORM_HOST=${{ secrets.TYPEORM_HOST }} >> .development.env
-      #     echo TYPEORM_PORT=${{ secrets.TYPEORM_PORT }} >> .development.env
-      #     echo TYPEORM_USERNAME=${{ secrets.TYPEORM_USERNAME }} >> .development.env
-      #     echo TYPEORM_PASSWORD=${{ secrets.TYPEORM_PASSWORD }} >> .development.env
-      #     echo TYPEORM_DATABASE=${{ secrets.TYPEORM_DATABASE }} >> .development.env
-      #     echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .development.env
-      #     echo TMAP_API_KEY=${{ secrets.TMAP_API_KEY }} >> .development.env
-      #     echo TZ=${{ secrets.TZ }} >> .development.env
-      #     echo REDIS_ENDPOINT=${{ secrets.REDIS_ENDPOINT }} >> .development.env
-      #     cat .development.env
+      - name: create env file
+        working-directory: ./
+        run: |
+          touch .development.env
+          echo SERVER_PORT=${{ secrets.SERVER_PORT }} >> .development.env
+          echo TYPEORM_HOST=${{ secrets.TYPEORM_HOST }} >> .development.env
+          echo TYPEORM_PORT=${{ secrets.TYPEORM_PORT }} >> .development.env
+          echo TYPEORM_USERNAME=${{ secrets.TYPEORM_USERNAME }} >> .development.env
+          echo TYPEORM_PASSWORD=${{ secrets.TYPEORM_PASSWORD }} >> .development.env
+          echo TYPEORM_DATABASE=${{ secrets.TYPEORM_DATABASE }} >> .development.env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .development.env
+          echo TMAP_API_KEY=${{ secrets.TMAP_API_KEY }} >> .development.env
+          echo TZ=${{ secrets.TZ }} >> .development.env
+          echo REDIS_ENDPOINT=${{ secrets.REDIS_ENDPOINT }} >> .development.env
+          cat .development.env
       - name: build server files
         working-directory: ./
         run: npm run build
