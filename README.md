@@ -64,7 +64,7 @@
 
 ## 시스템 구성도
 
-![_지금갈게 시스템구성도(중간) - README drawio](https://user-images.githubusercontent.com/55343124/195806415-ab92a44e-b149-4c8a-a0c2-1e0e36e51d1e.png)
+![_지금갈게 시스템구성도(중간) - README drawio (1)](https://user-images.githubusercontent.com/55343124/200184651-96f9db6d-596c-4b79-8528-5848909f5462.png)
 
 ---
 
