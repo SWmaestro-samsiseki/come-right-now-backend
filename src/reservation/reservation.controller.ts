@@ -63,6 +63,7 @@ export class ReservationController {
     return await this.reservationService.getReservationById(id);
   }
 
+  // FIXME: ApiHeader에 왜 토큰이 들어가 있는지
   @ApiHeader({
     name: 'Authorization',
     description: 'JWT Token',
