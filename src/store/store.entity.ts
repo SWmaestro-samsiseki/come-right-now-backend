@@ -89,7 +89,7 @@ export class Store extends BaseEntity {
   @ApiProperty()
   public menuImage: string;
 
-  @Column({ type: 'decimal', precision: 1, scale: 1, nullable: false })
+  @Column({ type: 'decimal', precision: 2, scale: 1, nullable: false })
   @ApiProperty()
   public starRate: number;
 
